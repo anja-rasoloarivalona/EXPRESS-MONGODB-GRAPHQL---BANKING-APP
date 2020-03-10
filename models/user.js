@@ -14,13 +14,9 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
-  status: {
-    type: String,
-    default: 'I am new!'
-  },
   transactions: [
     {
-      counterParty: String,
+      counterparty: String,
       details: String,
       usedWallet: String,
       amount: Number,
@@ -31,7 +27,8 @@ const userSchema = new Schema({
     {
       type: String,
       supplier: String,
-      amount: Number
+      amount: Number,
+      shortId: String
     }
   ]
 }, {timestamps: true});
