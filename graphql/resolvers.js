@@ -33,5 +33,15 @@ module.exports = {
         return {
             ...createdUser._doc, _id: createdUser._id.toString()
         }
+    },
+
+    getUser: async function({}, req) {
+        const user = await User.findOne({ email: 'test@test.com'})
+        if(!user){
+            const error = new Error('No user found');
+            error.statusCode = 404
+            throw error
+        }
+        return user
     }
 }

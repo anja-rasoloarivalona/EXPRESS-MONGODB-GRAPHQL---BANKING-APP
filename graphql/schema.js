@@ -29,7 +29,7 @@ module.exports = buildSchema(`
     }
 
     type RootQuery {
-        hello: String
+        getUser: User!
     }
     schema {
         query: RootQuery

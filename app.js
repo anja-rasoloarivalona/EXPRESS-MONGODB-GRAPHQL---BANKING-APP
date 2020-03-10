@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const graphHttp = require('express-graphql');
+const cors = require('cors');
 
 const graphqlSchema = require('./graphql/schema');
 const graphqlResolver = require('./graphql/resolvers');
@@ -9,6 +10,7 @@ const graphqlResolver = require('./graphql/resolvers');
 const app = express();
 
 
+app.use('*', cors());
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
@@ -27,7 +29,7 @@ app.use('/graphql', graphHttp({
   schema: graphqlSchema,
   rootValue: graphqlResolver,
   graphiql: true,
-  formatError(err) {
+  customFormatErrorFn(err) {
     if(!err.originalError) {
       return err
     }
