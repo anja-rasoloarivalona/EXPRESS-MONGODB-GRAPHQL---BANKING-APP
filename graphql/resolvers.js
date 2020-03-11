@@ -4,6 +4,8 @@ const validator = require('validator');
 const User = require('../models/user');
 module.exports = {
     createUser: async function({ userInput }, req) {
+        // createUser: async function(args, req) {
+        //email => args.userInput.email
         const errors = []
         if(!validator.isEmail(userInput.email)){
             errors.push('Email is not valid')
@@ -35,7 +37,7 @@ module.exports = {
         }
     },
 
-    getUser: async function({}, req) {
+    user: async function({}, req) {
         const user = await User.findOne({ email: 'test@test.com'})
         if(!user){
             const error = new Error('No user found');

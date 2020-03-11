@@ -9,12 +9,20 @@ module.exports = buildSchema(`
         status: String
     }
 
+    type Wallet {
+        type: String!
+        supplier: String!
+        amount: Int!
+        shortId: String
+    }
+
     type User {
         _id: ID!
         name: String!
         email: String!
         password: String
         transactions: [Transaction!]
+        wallets: [Wallet!]
     }
 
     input UserInputData {
@@ -29,7 +37,7 @@ module.exports = buildSchema(`
     }
 
     type RootQuery {
-        getUser: User!
+        user: User!
     }
     schema {
         query: RootQuery
