@@ -29,7 +29,8 @@ module.exports = {
         const user = new User ({
             email: userInput.email,
             name: userInput.name,
-            password: hashedPassword
+            password: hashedPassword,
+            status: 'created'
         })
         const createdUser = await user.save()
         return {

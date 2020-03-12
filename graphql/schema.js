@@ -4,6 +4,7 @@ module.exports = buildSchema(`
     type Transaction {
         counterparty: String!
         details: String!
+        date: String!
         usedWallet: String!
         amount: Int!
         status: String
@@ -16,13 +17,21 @@ module.exports = buildSchema(`
         shortId: String
     }
 
+    type Budget {
+        name: String!
+        amount: Int!
+        used: Int!
+    }
+
     type User {
         _id: ID!
         name: String!
         email: String!
-        password: String
+        password: String!
+        status: String!
         transactions: [Transaction!]
         wallets: [Wallet!]
+        budgets: [Budget!]
     }
 
     input UserInputData {

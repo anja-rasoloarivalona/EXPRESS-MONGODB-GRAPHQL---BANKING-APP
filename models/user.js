@@ -14,10 +14,19 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  status: String,
+  budgets: [
+    {
+      name: String,
+      amount: Number,
+      used: Number
+    }
+  ],
   transactions: [
     {
       counterparty: String,
       details: String,
+      Date: String,
       usedWallet: String,
       amount: Number,
       status: String
