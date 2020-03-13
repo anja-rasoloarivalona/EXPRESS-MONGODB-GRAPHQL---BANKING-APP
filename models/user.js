@@ -37,7 +37,8 @@ const userSchema = new Schema({
       type: String,
       supplier: String,
       amount: Number,
-      shortId: String
+      shortId: String,
+      color: String
     }
   ]
 }, {timestamps: true});

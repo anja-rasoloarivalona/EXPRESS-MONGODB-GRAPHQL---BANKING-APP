@@ -15,6 +15,7 @@ module.exports = buildSchema(`
         supplier: String!
         amount: Int!
         shortId: String
+        color: String!
     }
 
     type Budget {
@@ -34,6 +35,11 @@ module.exports = buildSchema(`
         budgets: [Budget!]
     }
 
+    type AuthData {
+        token: String!
+        user: User!
+    }
+
     input UserInputData {
         email: String!
         name: String!
@@ -42,11 +48,12 @@ module.exports = buildSchema(`
 
 
     type RootMutation {
-        createUser(userInput: UserInputData): User!
+        createUser(userInput: UserInputData): AuthData!
     }
 
     type RootQuery {
         user: User!
+        login(email: String!, password: String!): AuthData!
     }
     schema {
         query: RootQuery
