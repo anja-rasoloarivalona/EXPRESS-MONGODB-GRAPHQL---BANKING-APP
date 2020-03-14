@@ -34,11 +34,8 @@ const userSchema = new Schema({
   ],
   wallets: [
     {
-      type: String,
-      supplier: String,
-      amount: Number,
-      shortId: String,
-      color: String
+      type: Schema.Types.ObjectId,
+      ref: 'Wallet'
     }
   ]
 }, {timestamps: true});

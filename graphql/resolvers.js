@@ -3,6 +3,7 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user');
+const Wallet = require('../models/wallet')
 module.exports = {
     createUser: async function({ userInput }, req) {
         // createUser: async function(args, req) {
@@ -48,6 +49,42 @@ module.exports = {
         }
     },
 
+    createNewCard: async function({ cardInput}, req) {
+        const user = await User.findById(cardInput.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+
+        const createdCard = new Wallet ({
+            cardType: cardInput.cardType,
+            supplier: cardInput.supplier,
+            amount: parseInt(cardInput.amount),
+            shortId: cardInput.shortId,
+            color: cardInput.color,
+            owner: cardInput.userId
+        })
+        await createdCard.save()
+        user.wallets.push(createdCard) 
+        await user.save()
+        return createdCard
+
+    },
+    updatedOwnedCard: async function ({cardInput, cardId}, req) {
+        const user = await User.findById(cardInput.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+        const updatedCard = await Wallets.findById(cardId)
+        updatedCard.cardType = cardInput.cardType
+        updatedCard.supplier = cardInput.supplier
+        updatedCard.amount = parseInt(cardInput.amount)
+        updatedCard.shortId = cardInput.shortId
+        updatedCard.color = cardInput.color
+    },
     login: async function({ email, password}) {
         const user = await User.findOne({ email: email})
         if(!user) {
@@ -76,8 +113,8 @@ module.exports = {
         }
     },
 
-    user: async function({}, req) {
-        const user = await User.findOne({ email: 'test@test.com'})
+    user: async function({userId}, req) {
+        const user = await User.findById(userId).populate('wallets').exec()
         if(!user){
             const error = new Error('No user found');
             error.statusCode = 404
