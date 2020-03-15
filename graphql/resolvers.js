@@ -50,6 +50,11 @@ module.exports = {
     },
 
     createNewCard: async function({ cardInput}, req) {
+        if(!req.IsAuth) {
+            const error = new Error('User not authenticated.')
+            error.code = 401;
+            throw error
+        }
         const user = await User.findById(cardInput.userId)
         if(!user) {
             const error = new Error('User not found.')
