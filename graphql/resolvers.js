@@ -51,7 +51,7 @@ module.exports = {
 
     createNewCard: async function({ cardInput}, req) {
         if(!req.IsAuth) {
-            const error = new Error('User not authenticated.')
+            const error = new Error('Not authenticated.')
             error.code = 401;
             throw error
         }
@@ -61,7 +61,6 @@ module.exports = {
             error.code = 401;
             throw error
         }
-
         const createdCard = new Wallet ({
             cardType: cardInput.cardType,
             supplier: cardInput.supplier,
@@ -119,6 +118,11 @@ module.exports = {
     },
 
     user: async function({userId}, req) {
+        if(!req.IsAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
         const user = await User.findById(userId).populate('wallets').exec()
         if(!user){
             const error = new Error('No user found');
