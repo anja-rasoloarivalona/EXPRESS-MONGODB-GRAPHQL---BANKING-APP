@@ -48,47 +48,6 @@ module.exports = {
             }
         }
     },
-
-    createNewCard: async function({ cardInput}, req) {
-        if(!req.IsAuth) {
-            const error = new Error('Not authenticated.')
-            error.code = 401;
-            throw error
-        }
-        const user = await User.findById(cardInput.userId)
-        if(!user) {
-            const error = new Error('User not found.')
-            error.code = 401;
-            throw error
-        }
-        const createdCard = new Wallet ({
-            cardType: cardInput.cardType,
-            supplier: cardInput.supplier,
-            amount: parseInt(cardInput.amount),
-            shortId: cardInput.shortId,
-            color: cardInput.color,
-            owner: cardInput.userId
-        })
-        await createdCard.save()
-        user.wallets.push(createdCard) 
-        await user.save()
-        return createdCard
-
-    },
-    updatedOwnedCard: async function ({cardInput, cardId}, req) {
-        const user = await User.findById(cardInput.userId)
-        if(!user) {
-            const error = new Error('User not found.')
-            error.code = 401;
-            throw error
-        }
-        const updatedCard = await Wallets.findById(cardId)
-        updatedCard.cardType = cardInput.cardType
-        updatedCard.supplier = cardInput.supplier
-        updatedCard.amount = parseInt(cardInput.amount)
-        updatedCard.shortId = cardInput.shortId
-        updatedCard.color = cardInput.color
-    },
     login: async function({ email, password}) {
         const user = await User.findOne({ email: email})
         if(!user) {
@@ -116,14 +75,13 @@ module.exports = {
        
         }
     },
-
-    user: async function({userId}, req) {
-        if(!req.IsAuth) {
+    user: async function(args, req) {
+        if(!req.isAuth) {
             const error = new Error('Not authenticated.')
             error.code = 401;
             throw error
         }
-        const user = await User.findById(userId).populate('wallets').exec()
+        const user = await User.findById(req.userId).populate('wallets').exec()
         if(!user){
             const error = new Error('No user found');
             error.statusCode = 404
@@ -131,5 +89,59 @@ module.exports = {
         }
         return user
     },
+    addWallet: async function({ walletInput}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+        const newWallet = new Wallet ({
+            walletType: walletInput.walletType,
+            supplier: walletInput.supplier,
+            amount: parseInt(walletInput.amount),
+            shortId: walletInput.shortId,
+            color: walletInput.color,
+            owner: req.userId
+        })
+        await newWallet.save()
+        user.wallets.push(newWallet) 
+        await user.save()
+        return newWallet
+
+    },
+    editWallet: async function ({walletId, walletInput}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const updatedWallet = await Wallet.findById(walletId)
+        if(!updatedWallet) {
+            const error = new Error('No card found.')
+            error.code = 404;
+            throw error
+        }
+        if(updatedWallet.owner.toString() !== req.userId.toString()){
+            const error = new Error('Not authorized.')
+            error.code = 403;
+            throw error
+        }
+        updatedWallet.walletType = walletInput.walletType
+        updatedWallet.supplier = walletInput.supplier
+        updatedWallet.amount = parseInt(walletInput.amount)
+        updatedWallet.shortId = walletInput.shortId
+        updatedWallet.color = walletInput.color
+        await updatedWallet.save()
+        return updatedWallet
+    },
+    
+
+    
 
 }

@@ -34,7 +34,7 @@ module.exports = buildSchema(`
 
     type Wallet {
         _id: ID!
-        cardType: String!
+        walletType: String!
         supplier: String!
         amount: Int!
         shortId: String
@@ -48,24 +48,22 @@ module.exports = buildSchema(`
         password: String!
     }
     
-    input CardInputData {
-        userId: String!
-        cardType: String!
+    input WalletInputData {
+        walletType: String!
         supplier: String!
         amount: String!
         shortId: String
         color: String!
     }
 
-
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
-        createNewCard(cardInput: CardInputData): Wallet!
-        updatedOwnedCard(cardId: String!, cardInput: CardInputData!): Wallet!
+        addWallet(walletInput: WalletInputData): Wallet!
+        editWallet(walletId: String!, walletInput: WalletInputData!): Wallet!
     }
 
     type RootQuery {
-        user(userId: String!): User!
+        user: User!
         login(email: String!, password: String!): AuthData!
     }
     schema {

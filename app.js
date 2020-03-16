@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.user(isAuth)
+app.use(isAuth)
 
 app.use('/graphql', graphHttp({
   schema: graphqlSchema,
