@@ -10,22 +10,40 @@ module.exports = buildSchema(`
         status: String
     }
 
-    type Budget {
-        name: String!
-        amount: Int!
-        used: Int!
-    }
-
-    type User {
+    type Income {
         _id: ID!
         name: String!
-        email: String!
-        password: String!
-        status: String!
-        transactions: [Transaction!]
-        wallets: [Wallet!]
-        budgets: [Budget!]
+        amount: String!
+        used: Int
+        from: String!
+        frequency: Frequency!
+        lastPayout: String!
+        autoWriting: Boolean!
+        notification: Boolean!
+        owner: String
     }
+
+    input FrequencyInput {
+        counter: String!
+        period: String!
+    }
+
+    type Frequency {
+        counter: String!
+        period: String!
+    }
+
+    input IncomeInputData {
+        name: String!
+        amount: String!
+        from: String!
+        frequency: FrequencyInput!
+        lastPayout: String!
+        autoWriting: String!
+        notification: String!
+    }
+
+
 
     type AuthData {
         token: String!
@@ -42,12 +60,6 @@ module.exports = buildSchema(`
         owner: String
     }
 
-    input UserInputData {
-        email: String!
-        name: String!
-        password: String!
-    }
-    
     input WalletInputData {
         walletType: String!
         supplier: String!
@@ -56,10 +68,30 @@ module.exports = buildSchema(`
         color: String!
     }
 
+    type User {
+        _id: ID!
+        name: String!
+        email: String!
+        password: String!
+        status: String!
+        transactions: [Transaction!]
+        wallets: [Wallet!]
+        incomes: [Income!]
+    }
+
+    input UserInputData {
+        email: String!
+        name: String!
+        password: String!
+    }
+    
+ 
+
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
         addWallet(walletInput: WalletInputData): Wallet!
         editWallet(walletId: String!, walletInput: WalletInputData!): Wallet!
+        addIncome(incomeInput: IncomeInputData): Income!
     }
 
     type RootQuery {

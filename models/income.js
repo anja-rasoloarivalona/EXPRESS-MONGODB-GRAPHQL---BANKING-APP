@@ -10,6 +10,7 @@ const incomeSchema = new Schema({
         type: Number,
         required: true
     },
+    used: Number,
     from: {
         type: String,
         required: true

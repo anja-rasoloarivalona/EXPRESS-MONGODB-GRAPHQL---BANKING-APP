@@ -3,7 +3,8 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken')
 
 const User = require('../models/user');
-const Wallet = require('../models/wallet')
+const Wallet = require('../models/wallet');
+const Income = require('../models/income')
 module.exports = {
     createUser: async function({ userInput }, req) {
         // createUser: async function(args, req) {
@@ -81,7 +82,7 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        const user = await User.findById(req.userId).populate('wallets').exec()
+        const user = await User.findById(req.userId).populate('wallets incomes').exec()
         if(!user){
             const error = new Error('No user found');
             error.statusCode = 404
@@ -140,6 +141,48 @@ module.exports = {
         await updatedWallet.save()
         return updatedWallet
     },
+    addIncome: async function({ incomeInput}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+
+        let autoWriting, notification;
+
+        if(incomeInput.autoWriting === 'yes'){
+            autoWriting = true
+        } else {
+            autoWriting = false
+        }
+
+        if(incomeInput.notification === 'yes'){
+            notification = true
+        } else {
+            notification = false
+        }
+
+        const newIncome = new Income ({
+            name: incomeInput.name,
+            amount: parseInt(incomeInput.amount),
+            from: incomeInput.from,
+            frequency: incomeInput.frequency,
+            lastPayout: incomeInput.lastPayout,
+            autoWriting: autoWriting,
+            notification: notification,
+            owner: req.userId
+        })
+        await newIncome.save()
+        user.incomes.push(newIncome)
+        await user.save()
+        return newIncome
+    }
     
 
     
