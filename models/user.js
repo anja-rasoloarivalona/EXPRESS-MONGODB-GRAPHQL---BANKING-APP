@@ -15,13 +15,6 @@ const userSchema = new Schema({
     required: true
   },
   status: String,
-  budgets: [
-    {
-      name: String,
-      amount: Number,
-      used: Number
-    }
-  ],
   transactions: [
     {
       counterparty: String,
@@ -36,6 +29,12 @@ const userSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: 'Wallet'
+    }
+  ],
+  incomes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Income'
     }
   ]
 }, {timestamps: true});
