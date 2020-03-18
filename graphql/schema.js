@@ -13,7 +13,7 @@ module.exports = buildSchema(`
     type Income {
         _id: ID!
         name: String!
-        amount: String!
+        amount: Int!
         used: Int
         from: String!
         frequency: Frequency!
