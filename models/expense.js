@@ -19,10 +19,16 @@ const expenseSchema = new Schema({
         type: String,
         required: true
     },
+    frequency: {
+        counter: String,
+        period: String
+    },
     owner: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    lastPayout: String,
+    nextPayout: String
 }, {timestamps: true})
 
 module.exports = mongoose.model('Expense', expenseSchema)

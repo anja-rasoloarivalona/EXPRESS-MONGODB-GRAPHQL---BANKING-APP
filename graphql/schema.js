@@ -48,6 +48,9 @@ module.exports = buildSchema(`
         name: String!
         amount: Int!
         used: Int
+        lastPayout: String
+        nextPayout: String
+        frequency: Frequency
         category: String!
         expenseType: String!
         owner: String
@@ -56,8 +59,12 @@ module.exports = buildSchema(`
     input ExpenseInputData {
         name: String!
         amount: String!
+        used: String
         category: String!
         expenseType: String!
+        lastPayout: String
+        nextPayout: String
+        frequency: FrequencyInput
     }
 
 

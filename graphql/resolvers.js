@@ -85,7 +85,7 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        const user = await User.findById(req.userId).populate('wallets incomes').exec()
+        const user = await User.findById(req.userId).populate('wallets incomes expenses').exec()
         if(!user){
             const error = new Error('No user found');
             error.statusCode = 404
@@ -156,9 +156,6 @@ module.exports = {
             error.code = 401;
             throw error
         }
-
-        console.log('inpyt', incomeInput)
-
         let autoWriting, notification;
 
         if(incomeInput.autoWriting === 'yes'){
@@ -205,15 +202,34 @@ module.exports = {
             throw error
         }
 
-        const newExpense = new Expense ({
-            name: expenseInput.name,
-            amount: parseInt(expenseInput.amount),
-            category: expenseInput.category,
-            expenseType: expenseInput.expenseType,
-            used: 0,
-            owner: req.userId
-        })
+        let newExpense
 
+        if(expenseInput.expenseType === 'fixed'){
+            let nextPayout = dateRangeCalculator(expenseInput.frequency, expenseInput.lastPayout)
+            newExpense = new Expense ({
+                name: expenseInput.name,
+                amount: parseInt(expenseInput.amount),
+                category: expenseInput.category,
+                expenseType: expenseInput.expenseType,
+                lastPayout: expenseInput.lastPayout,
+                nextPayout: nextPayout,
+                owner: req.userId,
+                frequency: expenseInput.frequency,
+            })
+        } else {
+            newExpense = new Expense ({
+                name: expenseInput.name,
+                amount: parseInt(expenseInput.amount),
+                used: parseInt(expenseInput.used),
+                category: expenseInput.category,
+                expenseType: expenseInput.expenseType,
+                owner: req.userId,
+                frequency: {
+                    counter: 'once',
+                    period: 'a month'
+                }
+            })
+        }
         await newExpense.save()
         user.expenses.push(newExpense)
         await user.save()
