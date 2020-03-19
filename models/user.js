@@ -36,6 +36,12 @@ const userSchema = new Schema({
       type: Schema.Types.ObjectId,
       ref: 'Income'
     }
+  ],
+  expenses: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'Expense'
+    }
   ]
 }, {timestamps: true});
 

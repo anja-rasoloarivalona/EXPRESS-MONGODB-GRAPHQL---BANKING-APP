@@ -29,6 +29,10 @@ const incomeSchema = new Schema({
         type: String,
         required: true
     },
+    nextPayout: {
+        type: String, 
+        required: true
+    },
     autoWriting: {
         type: Boolean,
         required: true

@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken')
 
 const User = require('../models/user');
 const Wallet = require('../models/wallet');
-const Income = require('../models/income')
+const Income = require('../models/income');
+const Expense = require('../models/expense')
+
+const dateRangeCalculator = require('../utilities/DateRangeCalculator');
+
 module.exports = {
     createUser: async function({ userInput }, req) {
         // createUser: async function(args, req) {
@@ -50,7 +54,7 @@ module.exports = {
         }
     },
     login: async function({ email, password}) {
-        const user = await User.findOne({ email: email})
+        const user = await User.findOne({ email: email}).populate('wallets incomes').exec()
         if(!user) {
             const error = new Error('User not found.');
             error.code = 401;
@@ -66,7 +70,6 @@ module.exports = {
             userId: user._id.toString(),
             email: user.email
         }, 'infiowenfew123', { expiresIn: '24h'})
-
         return {
             token: token,
             user: {
@@ -154,6 +157,8 @@ module.exports = {
             throw error
         }
 
+        console.log('inpyt', incomeInput)
+
         let autoWriting, notification;
 
         if(incomeInput.autoWriting === 'yes'){
@@ -168,12 +173,15 @@ module.exports = {
             notification = false
         }
 
+        let nextPayout = dateRangeCalculator(incomeInput.frequency, incomeInput.lastPayout)
+
         const newIncome = new Income ({
             name: incomeInput.name,
             amount: parseInt(incomeInput.amount),
             from: incomeInput.from,
             frequency: incomeInput.frequency,
             lastPayout: incomeInput.lastPayout,
+            nextPayout: nextPayout,
             autoWriting: autoWriting,
             notification: notification,
             owner: req.userId
@@ -182,6 +190,34 @@ module.exports = {
         user.incomes.push(newIncome)
         await user.save()
         return newIncome
+    },
+
+    addExpense: async function({ expenseInput}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+
+        const newExpense = new Expense ({
+            name: expenseInput.name,
+            amount: parseInt(expenseInput.amount),
+            category: expenseInput.category,
+            expenseType: expenseInput.expenseType,
+            used: 0,
+            owner: req.userId
+        })
+
+        await newExpense.save()
+        user.expenses.push(newExpense)
+        await user.save()
+        return newExpense
     }
     
 

@@ -14,10 +14,10 @@ module.exports = buildSchema(`
         _id: ID!
         name: String!
         amount: Int!
-        used: Int
         from: String!
         frequency: Frequency!
         lastPayout: String!
+        nextPayout: String!
         autoWriting: Boolean!
         notification: Boolean!
         owner: String
@@ -41,6 +41,23 @@ module.exports = buildSchema(`
         lastPayout: String!
         autoWriting: String!
         notification: String!
+    }
+
+    type Expense {
+        _id: ID!
+        name: String!
+        amount: Int!
+        used: Int
+        category: String!
+        expenseType: String!
+        owner: String
+    }
+
+    input ExpenseInputData {
+        name: String!
+        amount: String!
+        category: String!
+        expenseType: String!
     }
 
 
@@ -77,6 +94,7 @@ module.exports = buildSchema(`
         transactions: [Transaction!]
         wallets: [Wallet!]
         incomes: [Income!]
+        expenses: [Expense!]
     }
 
     input UserInputData {
@@ -92,6 +110,7 @@ module.exports = buildSchema(`
         addWallet(walletInput: WalletInputData): Wallet!
         editWallet(walletId: String!, walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
+        addExpense(expenseInput: ExpenseInputData): Expense!
     }
 
     type RootQuery {
