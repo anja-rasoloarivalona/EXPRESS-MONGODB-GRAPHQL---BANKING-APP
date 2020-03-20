@@ -102,6 +102,19 @@ module.exports = buildSchema(`
         wallets: [Wallet!]
         incomes: [Income!]
         expenses: [Expense!]
+        goal: [Goal]
+    }
+
+    type Goal {
+        name: String!
+        amount: Int!
+        date: String!
+    }
+
+    input UserGoalInputData {
+        name: String!
+        amount: String!
+        date: String!
     }
 
     input UserInputData {
@@ -118,6 +131,7 @@ module.exports = buildSchema(`
         editWallet(walletId: String!, walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
+        addGoal(goalInput: UserGoalInputData): Goal!
     }
 
     type RootQuery {

@@ -14,6 +14,11 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  goal : {
+    name: String,
+    amount: Number,
+    date: String
+  },
   status: String,
   transactions: [
     {
