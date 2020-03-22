@@ -22,12 +22,8 @@ const userSchema = new Schema({
   status: String,
   transactions: [
     {
-      counterparty: String,
-      details: String,
-      Date: String,
-      usedWallet: String,
-      amount: Number,
-      status: String
+      type: Schema.Types.ObjectId,
+      ref: 'Transaction'
     }
   ],
   wallets: [

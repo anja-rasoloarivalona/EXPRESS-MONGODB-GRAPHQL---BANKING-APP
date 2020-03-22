@@ -2,12 +2,28 @@ const { buildSchema } = require('graphql')
 
 module.exports = buildSchema(`
     type Transaction {
-        counterparty: String!
-        details: String!
+        _id: ID!
+        shortId: String!
         date: String!
-        usedWallet: String!
+        counterparty: String!
         amount: Int!
-        status: String
+        details: String!
+        usedWallet: String!
+        status: String!
+        transactionType: String!
+        category: String,
+        owner: String!
+    }
+
+    input TransactionInput {
+        date: String!
+        counterparty: String!
+        amount: String!
+        details: String!
+        usedWallet: String!
+        status: String!
+        transactionType: String!
+        category: String
     }
 
     type Income {
@@ -20,7 +36,7 @@ module.exports = buildSchema(`
         nextPayout: String!
         autoWriting: Boolean!
         notification: Boolean!
-        owner: String
+        owner: String!
     }
 
     input FrequencyInput {
@@ -53,7 +69,7 @@ module.exports = buildSchema(`
         frequency: Frequency
         category: String!
         expenseType: String!
-        owner: String
+        owner: String!
     }
 
     input ExpenseInputData {
@@ -81,7 +97,7 @@ module.exports = buildSchema(`
         amount: Int!
         shortId: String
         color: String!
-        owner: String
+        owner: String!
     }
 
     input WalletInputData {
@@ -102,7 +118,7 @@ module.exports = buildSchema(`
         wallets: [Wallet!]
         incomes: [Income!]
         expenses: [Expense!]
-        goal: [Goal]
+        goal: Goal
     }
 
     type Goal {
@@ -132,6 +148,7 @@ module.exports = buildSchema(`
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
+        addTransaction(transactionInput: TransactionInput): Transaction!
     }
 
     type RootQuery {

@@ -10,7 +10,13 @@ const walletSchema = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    transactions: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: 'Transaction'
+        }
+    ]
 }, {timestamps: true})
 
 
