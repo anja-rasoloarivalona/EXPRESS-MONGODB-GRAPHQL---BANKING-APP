@@ -5,7 +5,8 @@ module.exports = buildSchema(`
         _id: ID!
         shortId: String!
         date: String!
-        counterparty: String!
+        name: String!
+        counterparty: String
         amount: Int!
         details: String!
         usedWallet: String!
@@ -17,13 +18,22 @@ module.exports = buildSchema(`
 
     input TransactionInput {
         date: String!
-        counterparty: String!
+        name: String!
+        counterparty: String
         amount: String!
         details: String!
         usedWallet: String!
+        walletId: String!
         status: String!
         transactionType: String!
         category: String
+    }
+
+    type MonthlyReport {
+        period: String!
+        amount: Int!
+        used: Int
+        transactions: [Transaction]
     }
 
     type Income {
@@ -37,6 +47,7 @@ module.exports = buildSchema(`
         autoWriting: Boolean!
         notification: Boolean!
         owner: String!
+        monthlyReport: MonthlyReport
     }
 
     input FrequencyInput {
@@ -70,6 +81,7 @@ module.exports = buildSchema(`
         category: String!
         expenseType: String!
         owner: String!
+        monthlyReport: MonthlyReport
     }
 
     input ExpenseInputData {
@@ -98,6 +110,7 @@ module.exports = buildSchema(`
         shortId: String
         color: String!
         owner: String!
+        transactions: [Transaction]
     }
 
     input WalletInputData {
@@ -138,6 +151,13 @@ module.exports = buildSchema(`
         name: String!
         password: String!
     }
+
+    type AddTransactionResultData {
+        transaction: Transaction!
+        wallets: [Wallet!]
+        incomes: [Income!]
+        expenses: [Expense!]
+    }
     
  
 
@@ -148,7 +168,7 @@ module.exports = buildSchema(`
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
-        addTransaction(transactionInput: TransactionInput): Transaction!
+        addTransaction(transactionInput: TransactionInput): AddTransactionResultData!
     }
 
     type RootQuery {

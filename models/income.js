@@ -44,7 +44,15 @@ const incomeSchema = new Schema({
     owner: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    monthlyReport: [{
+        period: String,
+        amount: Number,
+        transactions: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Transaction'
+        }],
+    }]
 }, {timestamps: true});
 
 module.exports = mongoose.model('Income', incomeSchema)

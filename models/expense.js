@@ -27,6 +27,18 @@ const expenseSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
+    currentPeriod: String, //MM-YYYY   3-2020
+    monthlyReport: [
+        {
+            period: String, //MM-YYYY   3-2020
+            amount: Number,
+            used: Number,
+            transactions: [{
+                type: Schema.Types.ObjectId,
+                ref: 'Transaction'
+            }],
+        }
+    ],
     lastPayout: String,
     nextPayout: String
 }, {timestamps: true})

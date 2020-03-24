@@ -10,10 +10,11 @@ const transactionSchema = new Schema({
         type: String, 
         required: true
     },
-    counterparty: {
+    name: {
         type: String, 
         required: true
     },
+    counterparty: String,
     amount: {
         type: Number, 
         required: true
