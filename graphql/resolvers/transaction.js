@@ -82,7 +82,7 @@ module.exports = {
         if (editedExpense.expenseType === 'fixed'){
             editedExpense.lastPayout = transactionInput.date
             editedExpense.nextPayout = dateRangeCalculator(editedExpense.frequency, transactionInput.date) 
-                           
+
             if(availableReports.includes(period)){
                 editedExpense.monthlyReport.find( (report, i) => {
                     if(report.period === period){
@@ -154,5 +154,61 @@ module.exports = {
         }
         
         await editedIncome.save()
+    },
+    editTransaction: async function({transactionInput}, req){
+        console.log('editing', transactionInput)
+
+        const editedTransaction = await Transaction.findById(transactionInput._id)
+        const user = await User.findById(req.userId).populate('wallets incomes expenses').exec()
+
+        // Compare date
+        if(editedTransaction.date !== transactionInput.date){
+                if(transactionInput.transactionType === 'income'){
+                    const editedIncomeId = user.incomes.find(income => income.name === transactionInput.name)._id
+                    const editedIncome = await Income.findById(editedIncomeId)
+                    editedIncome.lastPayout = transactionInput.date
+                    editedIncome.nextPayout = dateRangeCalculator(editedIncome.frequency, transactionInput.date)
+                    
+                    //update monthly report as well
+                    await editedIncome.save()
+                } else {
+                    const editedExpenseId = user.expenses.find(expense => expense.name === transactionInput.name)._id
+                    const editedExpense = await Expense.findById(editedExpenseId)
+                    if(editedExpense.expenseType !== 'variable'){
+                        editedExpense.lastPayout = transactionInput.date
+                        editedExpense.nextPayout = dateRangeCalculator(editedExpense.frequency, transactionInput.date)
+                        await editedExepnse.save()
+                    }
+                }
+                
+
+                
+        }
+
+       /***
+            Valeurs no problem :
+                    counterparty
+                    details
+                    status
+
+            valuers a probleme : 
+
+            date => update either the income or expense  monthlyReport
+            name => update either the income or expense monthReport
+            amount => update either the income or expense, the monthReport, and the wallet with walletId
+            wallet => update wallets data 
+
+        */ 
+        
+        
+
+        const userResData = await User.findById(req.userId).populate('wallets incomes expenses').exec()
+        const resData = {
+            // transaction: newTransaction, 
+            wallets: userResData.wallets,
+            incomes: userResData.incomes,
+            expenses: userResData.expenses
+        }
+        return resData
     }
 }

@@ -79,7 +79,7 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        const user = await User.findById(req.userId).populate('wallets incomes expenses transactions').exec()
+        const user = await User.findById(req.userId)
         if(!user){
             const error = new Error('No user found');
             error.statusCode = 404

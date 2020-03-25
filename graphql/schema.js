@@ -2,42 +2,41 @@ const { buildSchema } = require('graphql')
 
 module.exports = buildSchema(`
     type Transaction {
-        _id: ID!
+        _id: String!
         shortId: String!
         date: String!
         name: String!
         counterparty: String
         amount: Int!
         details: String!
-        usedWallet: String!
+        usedWalletId: String!
         status: String!
         transactionType: String!
         category: String,
-        owner: String!
     }
 
     input TransactionInput {
+        _id: String
         date: String!
         name: String!
         counterparty: String
         amount: String!
         details: String!
-        usedWallet: String!
-        walletId: String!
+        usedWalletId: String!
         status: String!
         transactionType: String!
         category: String
     }
 
-    type MonthlyReport {
+    type MonthlyReports {
         period: String!
-        amount: Int!
-        used: Int
+        income: Int
+        expense: Int
         transactions: [Transaction]
     }
 
     type Income {
-        _id: ID!
+        _id: String!
         name: String!
         amount: Int!
         from: String!
@@ -46,8 +45,6 @@ module.exports = buildSchema(`
         nextPayout: String!
         autoWriting: Boolean!
         notification: Boolean!
-        owner: String!
-        monthlyReport: MonthlyReport
     }
 
     input FrequencyInput {
@@ -71,7 +68,7 @@ module.exports = buildSchema(`
     }
 
     type Expense {
-        _id: ID!
+        _id: String!
         name: String!
         amount: Int!
         used: Int
@@ -80,8 +77,6 @@ module.exports = buildSchema(`
         frequency: Frequency
         category: String!
         expenseType: String!
-        owner: String!
-        monthlyReport: MonthlyReport
     }
 
     input ExpenseInputData {
@@ -103,7 +98,7 @@ module.exports = buildSchema(`
     }
 
     type Wallet {
-        _id: ID!
+        _id: String!
         walletType: String!
         supplier: String!
         amount: Int!
@@ -114,6 +109,7 @@ module.exports = buildSchema(`
     }
 
     input WalletInputData {
+        _id: String
         walletType: String!
         supplier: String!
         amount: String!
@@ -127,7 +123,7 @@ module.exports = buildSchema(`
         email: String!
         password: String!
         status: String!
-        transactions: [Transaction!]
+        monthlyReports: [MonthlyReports]
         wallets: [Wallet!]
         incomes: [Income!]
         expenses: [Expense!]
@@ -152,7 +148,7 @@ module.exports = buildSchema(`
         password: String!
     }
 
-    type AddTransactionResultData {
+    type TransactionResultData {
         transaction: Transaction!
         wallets: [Wallet!]
         incomes: [Income!]
@@ -164,11 +160,12 @@ module.exports = buildSchema(`
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
         addWallet(walletInput: WalletInputData): Wallet!
-        editWallet(walletId: String!, walletInput: WalletInputData!): Wallet!
+        editWallet(walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
-        addTransaction(transactionInput: TransactionInput): AddTransactionResultData!
+        addTransaction(transactionInput: TransactionInput): TransactionResultData!
+        editTransaction(transactionInput: TransactionInput): TransactionResultData!
     }
 
     type RootQuery {

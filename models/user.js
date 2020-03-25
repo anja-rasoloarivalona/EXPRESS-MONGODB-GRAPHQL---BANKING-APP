@@ -20,28 +20,143 @@ const userSchema = new Schema({
     date: String
   },
   status: String,
-  transactions: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Transaction'
-    }
-  ],
+  monthlyReports: [{
+      period: String,
+      income: Number,
+      expense: Number,
+      transactions: [
+        {
+          _id: {
+            type: String,
+            required: true,
+          },
+          shortId: {
+            type: String, 
+            required: true
+          },
+          date: {
+              type: String, 
+              required: true
+          },
+          name: {
+              type: String, 
+              required: true
+          },
+          counterparty: String,
+          amount: {
+              type: Number, 
+              required: true
+          },
+          details: {
+              type: String, 
+              required: true
+          },
+          usedWalletId: {
+             type: String, 
+             required: true
+          },
+          status: {
+              type: String, 
+              required: true
+          },
+          transactionType: {
+              type: String, 
+              required: true
+          },
+          category: String,
+        }
+      ]
+  }],
   wallets: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'Wallet'
+      _id: {
+        type: String,
+        required: true
+      },
+      walletType: String,
+      supplier: String,
+      amount: Number,
+      shortId: String,
+      color: String,
+      transactions: [{ _id: String}]
     }
   ],
   incomes: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'Income'
+      _id: {
+        type: String,
+        required: true
+      },
+      name: {
+        type: String,
+        required: true
+      },
+      amount: {
+          type: Number,
+          required: true
+      },
+      from: {
+          type: String,
+          required: true
+      },
+      frequency: {
+          counter: {
+              type: String,
+              required: true
+          },
+          period: {
+              type: String,
+              required: true
+          }
+      },
+      lastPayout: {
+          type: String,
+          required: true
+      },
+      nextPayout: {
+          type: String, 
+          required: true
+      },
+      autoWriting: {
+          type: Boolean,
+          required: true
+      },
+      notification: {
+          type: Boolean,
+          required: true
+      },
     }
   ],
   expenses: [
     {
-      type: Schema.Types.ObjectId,
-      ref: 'Expense'
+      _id: {
+        type: String,
+        required: true
+      },
+      name: {
+        type: String,
+        required: true
+      },
+      amount: {
+          type: Number,
+          required: true
+      },
+      currentPeriod: String,
+      used: Number,
+      category: {
+          type: String,
+          required: true
+      },
+      expenseType: {
+          type: String,
+          required: true
+      },
+      frequency: {
+          counter: String,
+          period: String
+      },
+      lastPayout: String,
+      nextPayout: String
     }
   ]
 }, {timestamps: true});
