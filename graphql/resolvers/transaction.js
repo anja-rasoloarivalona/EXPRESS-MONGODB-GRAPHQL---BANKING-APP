@@ -1,10 +1,6 @@
 const User = require('../../models/user')
-const Transaction = require('../../models/transaction')
-const Wallet = require('../../models/wallet')
-const mongoose = require('mongoose')
-const Expense = require('../../models/expense')
-const Income = require('../../models/income')
 const dateRangeCalculator = require('../../utilities/DateRangeCalculator')
+const { uuid } = require('uuidv4')
 
 module.exports = {
     addTransaction: async function({transactionInput}, req) {
@@ -20,195 +16,135 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        let transactionCounter = 0
-        if(user.transactions && user.transactions.length > 0){
-            transactionCounter = user.transactions.length
+
+        // DETERMINE THE TRANSACTION TYPE
+        let isIncome = false
+        let isExpense = false
+        if (transactionInput.transactionType === 'expense'){
+            isExpense = true
+        } else {
+            isIncome = true
         }
-        let amount = parseInt(transactionInput.amount)
-        if(transactionInput.transactionType === 'expense'){
-            amount = amount * -1
+
+        // PREPARE AMOUNT DATA
+        const amount = parseInt(transactionInput.amount)
+
+        // CALCULATE THE NEW TRANSACTION RANK
+        let rank = 0
+        if(user.monthlyReports.length > 0){
+            user.monthlyReports.forEach(report => {
+                rank += report.transactions.length
+            })
         }
-        const newTransaction = new Transaction ({
-            shortId: transactionCounter + 1,
+
+        
+
+
+        // CREATE THE TRANSACTION
+        const newTransaction = {
+            _id: uuid(),
+            shortId: rank + 1,
             date: transactionInput.date,
             name: transactionInput.name,
             counterparty: transactionInput.counterparty,
-            amount: amount,
+            amount: isIncome ? amount : amount * -1,
             details: transactionInput.details,
-            usedWallet: mongoose.Types.ObjectId(transactionInput.walletId),
+            usedWalletId: transactionInput.usedWalletId,
             status: transactionInput.status,
             transactionType: transactionInput.transactionType,
             owner: req.userId
-        })
-        if (newTransaction.transactionType === 'expense'){
+        }
+
+        // ADD A CATEGORY FIELD FOR EXPENSES
+        if (isExpense){
             newTransaction.category = transactionInput.category
         }
-        await newTransaction.save()
 
+        // CREATE THE PERIOD
         const d = new Date(transactionInput.date)
         const period = `${d.getMonth() + 1}-${d.getFullYear()}`
 
-        if (newTransaction.transactionType === 'expense'){
-            await this.addExpenseTransaction(transactionInput, newTransaction._id, period, amount)
-        } else {
-            await this.addIncomeTransaction(transactionInput, newTransaction._id, period, amount)
-        }
-        user.transactions.push(newTransaction._id)
-        await user.save()
-        const wallet = await Wallet.findById(transactionInput.walletId)
-        wallet.transactions.push(newTransaction._id)
-        wallet.amount += amount
-        await wallet.save()
-
-        const userResData = await User.findById(req.userId).populate('wallets incomes expenses').exec()
-        const resData = {
-            transaction: newTransaction, 
-            wallets: userResData.wallets,
-            incomes: userResData.incomes,
-            expenses: userResData.expenses
-        }
-        return resData
-    },
-
-    addExpenseTransaction: async function(transactionInput, transactionId, period, amount){
-        const editedExpense = await Expense.findOne({ 'name': transactionInput.name})
-        const availableReports = []
-
-        if(editedExpense.monthlyReport && editedExpense.monthlyReport.length > 0){
-            editedExpense.monthlyReport.forEach(report => {
-                availableReports.push(report.period)
-        })
-        }
-        if (editedExpense.expenseType === 'fixed'){
-            editedExpense.lastPayout = transactionInput.date
-            editedExpense.nextPayout = dateRangeCalculator(editedExpense.frequency, transactionInput.date) 
-
-            if(availableReports.includes(period)){
-                editedExpense.monthlyReport.find( (report, i) => {
-                    if(report.period === period){
-                        editedExpense.monthlyReport[i].amount -= amount
-                        editedExpense.monthlyReport[i].transactions.push(transactionId)
-                    }
-                })
-            } else {
-                editedExpense.monthlyReport.push({
-                    period: period,
-                    amount: amount * -1,
-                    transactions: [transactionId]
-                })
-            }                       
-        } 
-        if (editedExpense.expenseType === 'variable'){
-            if(editedExpense.currentPeriod === period){
-                editedExpense.used -= amount
-            } 
-            if(availableReports.includes(period)){
-                editedExpense.monthlyReport.find( (report, i) => {
-                    if(report.period === period){
-                        editedExpense.monthlyReport[i].used -= amount
-                        editedExpense.monthlyReport[i].transactions.push(transactionId)
-                    }
-                })
-            } else {
-                editedExpense.monthlyReport.push({
-                    period: period,
-                    amount: editedExpense.amount,
-                    used: amount * -1,
-                    transactions: [transactionId]
-                })
-            }
-        }
-        await editedExpense.save()
-    },
-    addIncomeTransaction: async function(transactionInput, transactionId, period, amount){
-        const editedIncome = await Income.findOne({'name': transactionInput.name })
-
-        editedIncome.lastPayout = transactionInput.date
-        editedIncome.nextPayout = dateRangeCalculator(editedIncome.frequency, transactionInput.date)
-
-        if(editedIncome.monthlyReport && editedIncome.monthlyReport.length > 0){
-            const availableReports = []
-            editedIncome.monthlyReport.forEach(report => {
-                    availableReports.push(report.period)
-            })
-            if(availableReports.includes(period)){
-                editedIncome.monthlyReport.find( (report, i) => {
-                    if(report.period === period){
-                        editedIncome.monthlyReport[i].amount += amount
-                        editedIncome.monthlyReport[i].transactions.push(transactionId)
-                    }
-                })
-            } else {
-                editedIncome.monthlyReport.push({
-                    period: period,
-                    amount: amount,
-                    transactions: [transactionId]
-                })
-            }
-        } else {
-            editedIncome.monthlyReport = [{
+        // CHECK IF WE ALREADY HAVE MONTHLY REPORTS
+        if(user.monthlyReports.length < 1){
+            // CREATE NEW ONE
+            user.monthlyReports = [{
                 period: period,
-                amount: amount,
-                transactions: [transactionId]
+                income: isIncome ? amount : 0,
+                expense: isExpense ? amount: 0,
+                transactions: [newTransaction]
             }]
+        } else {
+           const didFindReport = user.monthlyReports.find( (report, index) => {
+                if(report.period === period){
+                    user.monthlyReports[index].transactions.push(newTransaction)
+                    if(isIncome){
+                        user.monthlyReports[index].income += amount
+                    } else {
+                        user.monthlyReports[index].expense += amount
+                    }
+                    return true
+                }
+            })
+            if(!didFindReport){
+                user.monthlyReports.push({
+                    period: period,
+                    income: isIncome ? amount : 0,
+                    expense: isExpense ? amount: 0,
+                    transactions: [newTransaction]
+                })
+            }
         }
-        
-        await editedIncome.save()
-    },
-    editTransaction: async function({transactionInput}, req){
-        console.log('editing', transactionInput)
 
-        const editedTransaction = await Transaction.findById(transactionInput._id)
-        const user = await User.findById(req.userId).populate('wallets incomes expenses').exec()
+        // UPDATE THE USED WALLET
+        user.wallets.find( (wallet, index) => {
+            if(wallet._id === transactionInput.usedWalletId){
+                if(isIncome){
+                    user.wallets[index].amount += amount
+                }
+                if(isExpense){
+                    user.wallets[index].amount -= amount 
+                }
+                return true
+            }
+        })
 
-        // Compare date
-        if(editedTransaction.date !== transactionInput.date){
-                if(transactionInput.transactionType === 'income'){
-                    const editedIncomeId = user.incomes.find(income => income.name === transactionInput.name)._id
-                    const editedIncome = await Income.findById(editedIncomeId)
-                    editedIncome.lastPayout = transactionInput.date
-                    editedIncome.nextPayout = dateRangeCalculator(editedIncome.frequency, transactionInput.date)
-                    
-                    //update monthly report as well
-                    await editedIncome.save()
-                } else {
-                    const editedExpenseId = user.expenses.find(expense => expense.name === transactionInput.name)._id
-                    const editedExpense = await Expense.findById(editedExpenseId)
-                    if(editedExpense.expenseType !== 'variable'){
-                        editedExpense.lastPayout = transactionInput.date
-                        editedExpense.nextPayout = dateRangeCalculator(editedExpense.frequency, transactionInput.date)
-                        await editedExepnse.save()
+        // UPDATE INCOME DATE IF INCOME
+        if(isIncome){
+            user.incomes.find( (income, index) => {
+                if(income.name === transactionInput.name){
+                    user.incomes[index].lastPayout = transactionInput.date
+                    user.incomes[index].nextPayout = dateRangeCalculator(income.frequency, transactionInput.date).toLocaleDateString() 
+                    return true
+                }
+            })
+        }
+
+        // UPDATE EXPENSE DATA IF EXPENSE
+        if(isExpense){
+            let isFixed = false
+            let isVariable = false
+            user.expenses.find( (expense, index) => {
+                if(expense.name === transactionInput.name){
+                    if(user.expenses[index].expenseType === 'variable'){
+                        isVariable = true
+                    } else {
+                        isFixed = true
+                    }
+
+                    if(isFixed){
+                        user.expenses[index].lastPayout = transactionInput.date
+                        user.expenses[index].nextPayout = dateRangeCalculator(expense.frequency, transactionInput.date).toLocaleDateString()
+                    }
+                    if(isVariable){
+                        if(user.expenses[index].currentPeriod === period){
+                            user.expenses[index].used += amount
+                        }        
                     }
                 }
-                
-
-                
+            })
         }
 
-       /***
-            Valeurs no problem :
-                    counterparty
-                    details
-                    status
-
-            valuers a probleme : 
-
-            date => update either the income or expense  monthlyReport
-            name => update either the income or expense monthReport
-            amount => update either the income or expense, the monthReport, and the wallet with walletId
-            wallet => update wallets data 
-
-        */ 
-        
-        
-
-        const userResData = await User.findById(req.userId).populate('wallets incomes expenses').exec()
-        const resData = {
-            // transaction: newTransaction, 
-            wallets: userResData.wallets,
-            incomes: userResData.incomes,
-            expenses: userResData.expenses
-        }
-        return resData
+       const userResData = await user.save()
+        return userResData
     }
 }

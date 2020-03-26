@@ -32,11 +32,14 @@ module.exports = {
                 frequency: expenseInput.frequency,
             }
         } else {
+            const d = new Date()
+            const period = `${d.getMonth() + 1}-${d.getFullYear()}`
             newExpense = {
                 _id: uuid(),
                 name: expenseInput.name,
                 amount: parseInt(expenseInput.amount),
                 used: parseInt(expenseInput.used),
+                period: period,
                 category: expenseInput.category,
                 expenseType: expenseInput.expenseType,
                 owner: req.userId,

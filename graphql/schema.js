@@ -105,8 +105,6 @@ module.exports = buildSchema(`
         amount: Int!
         shortId: String
         color: String!
-        owner: String!
-        transactions: [Transaction]
     }
 
     input WalletInputData {
@@ -149,15 +147,6 @@ module.exports = buildSchema(`
         password: String!
     }
 
-    type TransactionResultData {
-        transaction: Transaction!
-        wallets: [Wallet!]
-        incomes: [Income!]
-        expenses: [Expense!]
-    }
-    
- 
-
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
         addWallet(walletInput: WalletInputData): Wallet!
@@ -165,8 +154,8 @@ module.exports = buildSchema(`
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
-        addTransaction(transactionInput: TransactionInput): TransactionResultData!
-        editTransaction(transactionInput: TransactionInput): TransactionResultData!
+        addTransaction(transactionInput: TransactionInput): User!
+        editTransaction(transactionInput: TransactionInput): User!
     }
 
     type RootQuery {

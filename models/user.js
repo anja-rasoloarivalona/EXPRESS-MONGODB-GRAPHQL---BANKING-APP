@@ -77,8 +77,7 @@ const userSchema = new Schema({
       supplier: String,
       amount: Number,
       shortId: String,
-      color: String,
-      transactions: [{ _id: String}]
+      color: String
     }
   ],
   incomes: [
