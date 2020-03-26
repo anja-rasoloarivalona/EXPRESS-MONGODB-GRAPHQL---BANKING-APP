@@ -1,4 +1,3 @@
-const Wallet = require('../../models/wallet');
 const User = require('../../models/user');
 const { uuid } = require('uuidv4')
 

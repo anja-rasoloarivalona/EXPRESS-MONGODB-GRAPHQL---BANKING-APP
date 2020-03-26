@@ -1,5 +1,5 @@
-const Income = require('../../models/income');
 const User = require('../../models/user');
+const { uuid } = require('uuidv4')
 
 module.exports = {
     addIncome: async function({ incomeInput}, req) {
@@ -30,7 +30,9 @@ module.exports = {
 
         let nextPayout = dateRangeCalculator(incomeInput.frequency, incomeInput.lastPayout)
 
-        const newIncome = new Income ({
+        console.log(nextPayout)
+        const newIncome = {
+            _id: uuid(),
             name: incomeInput.name,
             amount: parseInt(incomeInput.amount),
             from: incomeInput.from,
@@ -38,12 +40,13 @@ module.exports = {
             lastPayout: incomeInput.lastPayout,
             nextPayout: nextPayout,
             autoWriting: autoWriting,
-            notification: notification,
-            owner: req.userId
-        })
-        await newIncome.save()
+            notification: notification
+        }
         user.incomes.push(newIncome)
         await user.save()
+        
+        newIncome.nextPayout = newIncome.nextPayout.toLocaleDateString()
+        console.log('add', newIncome)
         return newIncome
     },
 }

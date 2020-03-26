@@ -58,6 +58,7 @@ module.exports = buildSchema(`
     }
 
     input IncomeInputData {
+        _id: String
         name: String!
         amount: String!
         from: String!

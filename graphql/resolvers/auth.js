@@ -48,7 +48,7 @@ module.exports = {
         }
     },
     login: async function({ email, password}) {
-        const user = await User.findOne({ email: email}).populate('wallets incomes expenses').exec()
+        const user = await User.findOne({ email: email})
         if(!user) {
             const error = new Error('User not found.');
             error.code = 401;

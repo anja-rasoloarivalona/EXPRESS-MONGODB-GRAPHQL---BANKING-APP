@@ -1,6 +1,6 @@
-const Expense = require('../../models/expense')
 const User = require('../../models/user');
 const dateRangeCalculator = require('../../utilities/DateRangeCalculator');
+const { uuid } = require('uuidv4')
 
 module.exports = {
     addExpense: async function({ expenseInput}, req) {
@@ -20,7 +20,8 @@ module.exports = {
 
         if(expenseInput.expenseType === 'fixed'){
             let nextPayout = dateRangeCalculator(expenseInput.frequency, expenseInput.lastPayout)
-            newExpense = new Expense ({
+            newExpense = {
+                _id: uuid(),
                 name: expenseInput.name,
                 amount: parseInt(expenseInput.amount),
                 category: expenseInput.category,
@@ -29,9 +30,10 @@ module.exports = {
                 nextPayout: nextPayout,
                 owner: req.userId,
                 frequency: expenseInput.frequency,
-            })
+            }
         } else {
-            newExpense = new Expense ({
+            newExpense = {
+                _id: uuid(),
                 name: expenseInput.name,
                 amount: parseInt(expenseInput.amount),
                 used: parseInt(expenseInput.used),
@@ -42,11 +44,13 @@ module.exports = {
                     counter: 'once',
                     period: 'a month'
                 }
-            })
+            }
         }
-        await newExpense.save()
         user.expenses.push(newExpense)
         await user.save()
+        if(expenseInput.expenseType === 'fixed'){
+            newExpense.nextPayout = newExpense.nextPayout.toLocaleDateString()
+        }
         return newExpense
     },
 }
