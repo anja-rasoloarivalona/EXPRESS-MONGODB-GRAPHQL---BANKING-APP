@@ -154,7 +154,9 @@ module.exports = buildSchema(`
         addIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
+        
         addTransaction(transactionInput: TransactionInput): User!
+        deleteTransaction(transactionInput: TransactionInput): User!
         editTransaction(transactionInput: TransactionInput): User!
     }
 

@@ -1,4 +1,4 @@
-module.exports = dateRangeCalculator = (frequency, previousDate) => {
+module.exports = dateRangeCalculator = (frequency, previousDate, rollsBack) => {
 let dayLength = 24 * 60 * 60 * 1000
 let prev = new Date(previousDate)
 let prevMonth = prev.getMonth()
@@ -13,6 +13,13 @@ if( frequency.period === 'a month'){
    let period =  periodData[frequency.period]
    nbDaysBeforeNextDate = Math.ceil(period / counter)
 }
-let nextDate = new Date(prev.getTime() + nbDaysBeforeNextDate * dayLength)
-return nextDate
+
+let resDate
+if(!rollsBack){
+   resDate = new Date(prev.getTime() + nbDaysBeforeNextDate * dayLength)
+} else {
+   resDate = new Date(prev.getTime() - nbDaysBeforeNextDate * dayLength)
+}
+
+return resDate
 }
