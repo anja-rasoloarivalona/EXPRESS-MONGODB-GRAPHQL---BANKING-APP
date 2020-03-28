@@ -254,9 +254,19 @@ module.exports = {
 
         // CHECK IF WE ARE EDITING
         if(isEditing){
+            // Pass on all the correct data for the new transaction to be added 
+            let amount = transactionInput.amount
+            if(transactionInput.transactionType === 'expense' && amount > 0){
+                amount = amount * -1
+            }
+            if(transactionInput.transactionType === 'income' && amount < 0){
+                amount = amount * -1
+            }
+
             const data = {
                 transactionInput : {
                     ...transactionInput,
+                    amount: amount,
                     deletedTransaction_id: deletedTransaction._id,
                     deletedTransaction_shortId: deletedTransaction.shortId
                 }
