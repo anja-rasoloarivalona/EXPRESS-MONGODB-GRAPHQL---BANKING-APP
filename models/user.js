@@ -76,6 +76,7 @@ const userSchema = new Schema({
       walletType: String,
       supplier: String,
       amount: Number,
+      creditLimit: Number,
       shortId: String,
       color: String
     }

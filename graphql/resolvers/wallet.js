@@ -23,6 +23,9 @@ module.exports = {
             color: walletInput.color,
             owner: req.userId
         }
+        if(['Visa', 'MasterCard'].includes(walletInput.walletType)){
+            newWallet.creditLimit = parseInt(walletInput.creditLimit)
+        }
         user.wallets.push(newWallet) 
         await user.save()
         return newWallet
@@ -44,6 +47,8 @@ module.exports = {
         user.wallets.find( (wallet, index) => {
             if(wallet._id === walletInput._id){
                 updatedWalletIndex = index
+                console.log('index', index)
+                console.log('tr', updatedWalletIndex)
                 user.wallets[index] = {
                     _id: wallet._id,
                     walletType: walletInput.walletType,
@@ -52,10 +57,17 @@ module.exports = {
                     shortId: walletInput.shortId,
                     color: walletInput.color
                 }
-                return true
+                if(['Visa', 'MasterCard'].includes(wallet.walletType)){
+                    user.wallets[index] = {
+                        ...user.wallets[index],
+                        creditLimit: walletInput.creditLimit
+                    }
+                }
             }
         })
         await user.save()
+        console.log('res1', updatedWalletIndex)
+        console.log('res', user.wallets[updatedWalletIndex])
         return user.wallets[updatedWalletIndex]
     },
 }

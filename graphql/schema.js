@@ -103,6 +103,7 @@ module.exports = buildSchema(`
         walletType: String!
         supplier: String!
         amount: Int!
+        creditLimit: Int
         shortId: String
         color: String!
     }
@@ -112,6 +113,7 @@ module.exports = buildSchema(`
         walletType: String!
         supplier: String!
         amount: String!
+        creditLimit: String
         shortId: String
         color: String!
     }
