@@ -110,11 +110,22 @@ module.exports = {
                     user.wallets[index].amount += amount
                 }
                 if(isExpense){
-                    user.wallets[index].amount -= amount 
+                    user.wallets[index].amount -= amount
                 }
                 return true
             }
         })
+
+        // UPDATE CREDIT CARD WALLET IF NEEDED
+        const creditCards = ['Visa', 'MasterCard']
+        if(creditCards.includes(transactionInput.name.split(' ')[0])){
+            user.wallets.find( (wallet, index) => {
+                if(wallet.walletType === transactionInput.name.split(' ')[0] && wallet.supplier === transactionInput.name.split(' ')[1]){
+                    user.wallets[index].amount -= amount
+                    return true
+                }
+            })
+        }
 
         // UPDATE INCOME DATE IF INCOME
         if(isIncome){
@@ -241,6 +252,17 @@ module.exports = {
                     user.wallets[index].amount -= deletedTransaction.amount
                 }
             })
+
+            // CHECK IF THE TRANSACTION IS A PAYMENT TO A CREDIT CARD
+            const creditCards = ['Visa', 'MasterCard']
+            if(creditCards.includes(deletedTransaction.name.split(' ')[0])){
+            user.wallets.find( (wallet, index) => {
+                if(wallet.walletType === deletedTransaction.name.split(' ')[0] && wallet.supplier === deletedTransaction.name.split(' ')[1]){
+                    user.wallets[index].amount -= deletedTransaction.amount
+                    return true
+                }
+                })
+            }
 
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].expense +=deletedTransaction.amount
