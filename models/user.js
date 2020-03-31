@@ -125,6 +125,7 @@ const userSchema = new Schema({
           type: Boolean,
           required: true
       },
+      color: String
     }
   ],
   expenses: [
@@ -156,7 +157,8 @@ const userSchema = new Schema({
           period: String
       },
       lastPayout: String,
-      nextPayout: String
+      nextPayout: String,
+      color: String
     }
   ]
 }, {timestamps: true});

@@ -45,6 +45,7 @@ module.exports = buildSchema(`
         nextPayout: String!
         autoWriting: Boolean!
         notification: Boolean!
+        color: String
     }
 
     input FrequencyInput {
@@ -66,6 +67,7 @@ module.exports = buildSchema(`
         lastPayout: String!
         autoWriting: String!
         notification: String!
+        color: String!
     }
 
     type Expense {
@@ -78,9 +80,11 @@ module.exports = buildSchema(`
         frequency: Frequency
         category: String!
         expenseType: String!
+        color: String
     }
 
     input ExpenseInputData {
+        _id: String
         name: String!
         amount: String!
         used: String
@@ -89,6 +93,7 @@ module.exports = buildSchema(`
         lastPayout: String
         nextPayout: String
         frequency: FrequencyInput
+        color: String
     }
 
 
@@ -154,7 +159,9 @@ module.exports = buildSchema(`
         addWallet(walletInput: WalletInputData): Wallet!
         editWallet(walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
+        editIncome(incomeInput: IncomeInputData): Income!
         addExpense(expenseInput: ExpenseInputData): Expense!
+        editExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
         
         addTransaction(transactionInput: TransactionInput): User!
