@@ -160,7 +160,11 @@ const userSchema = new Schema({
       nextPayout: String,
       color: String
     }
-  ]
+  ],
+  settings: {
+    dashboardLayout: Array,
+    theme: String
+  }
 }, {timestamps: true});
 
 module.exports = mongoose.model('User', userSchema);

@@ -32,9 +32,11 @@ module.exports = {
             isIncome = true
         }
 
+        console.log('adding')
         // PREPARE AMOUNT DATA
         const amount = parseInt(transactionInput.amount)
 
+        console.log('amount parsed', amount)
         // CALCULATE THE NEW TRANSACTION RANK
         let rank = 0
 
@@ -47,6 +49,11 @@ module.exports = {
         } else {
             rank = transactionInput.deletedTransaction_shortId
         }
+
+        let transactionAmount = amount;
+        if(isExpense && amount > 0) {
+            transactionAmount = amount * -1
+        } 
         
         // CREATE THE TRANSACTION
         const newTransaction = {
@@ -55,13 +62,15 @@ module.exports = {
             date: transactionInput.date,
             name: transactionInput.name,
             counterparty: transactionInput.counterparty,
-            amount: isIncome ? amount : amount * -1,
+            amount: transactionAmount,
             details: transactionInput.details,
             usedWalletId: transactionInput.usedWalletId,
             status: transactionInput.status,
             transactionType: transactionInput.transactionType,
             owner: req.userId
         }
+
+        console.log('new', newTransaction.amount)
 
         // ADD A CATEGORY FIELD FOR EXPENSES
         if (isExpense){

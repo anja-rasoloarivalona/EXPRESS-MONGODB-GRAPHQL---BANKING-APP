@@ -134,6 +134,25 @@ module.exports = buildSchema(`
         incomes: [Income!]
         expenses: [Expense!]
         goal: Goal
+        settings: Settings
+    }
+
+    type Settings {
+        dashboardLayout: [DashboardLayoutItem]
+        theme: String
+    }
+
+    type DashboardLayoutItem {
+        x: Int,
+        y: Int,
+        w: Int,
+        h: Int,
+        i: String
+    }
+
+
+    input DashboardLayoutInputData {
+        layout: String
     }
 
     type Goal {
@@ -163,10 +182,12 @@ module.exports = buildSchema(`
         addExpense(expenseInput: ExpenseInputData): Expense!
         editExpense(expenseInput: ExpenseInputData): Expense!
         addGoal(goalInput: UserGoalInputData): Goal!
-        
         addTransaction(transactionInput: TransactionInput): User!
         deleteTransaction(transactionInput: TransactionInput): User!
         editTransaction(transactionInput: TransactionInput): User!
+        setTheme(theme: String!): User!
+        updateDashboardLayout(layoutInput: DashboardLayoutInputData): [DashboardLayoutItem]
+        
     }
 
     type RootQuery {

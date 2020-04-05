@@ -74,6 +74,7 @@ module.exports = {
         }
     },
     user: async function(args, req) {
+        console.log('getting user')
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')
             error.code = 401;

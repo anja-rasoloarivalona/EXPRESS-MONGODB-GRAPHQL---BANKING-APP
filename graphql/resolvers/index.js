@@ -4,5 +4,6 @@ module.exports = {
     ...require('./income'),
     ...require('./expense'),
     ...require('./goal'),
-    ...require('./transaction')
+    ...require('./transaction'),
+    ...require('./settings')
 }
