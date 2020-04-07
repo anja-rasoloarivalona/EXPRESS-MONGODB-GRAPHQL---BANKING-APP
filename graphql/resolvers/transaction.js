@@ -22,7 +22,6 @@ module.exports = {
             error.code = 401;
             throw error
         }
-
         // DETERMINE THE TRANSACTION TYPE
         let isIncome = false
         let isExpense = false
@@ -32,11 +31,9 @@ module.exports = {
             isIncome = true
         }
 
-        console.log('adding')
         // PREPARE AMOUNT DATA
         const amount = parseInt(transactionInput.amount)
 
-        console.log('amount parsed', amount)
         // CALCULATE THE NEW TRANSACTION RANK
         let rank = 0
 
@@ -69,8 +66,6 @@ module.exports = {
             transactionType: transactionInput.transactionType,
             owner: req.userId
         }
-
-        console.log('new', newTransaction.amount)
 
         // ADD A CATEGORY FIELD FOR EXPENSES
         if (isExpense){
@@ -112,21 +107,26 @@ module.exports = {
             }
         }
 
-        // UPDATE THE USED WALLET
+
+        // UPDATE WALLET
+
+        let usedWalletIndex
         user.wallets.find( (wallet, index) => {
             if(wallet._id === transactionInput.usedWalletId){
-                if(isIncome){
-                    user.wallets[index].amount += amount
-                }
-                if(isExpense){
-                    user.wallets[index].amount -= amount
-                }
+                usedWalletIndex = index
                 return true
             }
         })
 
-        // UPDATE CREDIT CARD WALLET IF NEEDED
         const creditCards = ['Visa', 'MasterCard']
+
+        if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
+                user.wallets[usedWalletIndex].amount -= transactionAmount
+        } else {
+                user.wallets[usedWalletIndex].amount += transactionAmount
+        }
+
+        // UPDATE CREDIT CARD IF THE TRANSACTION IS A PAYMENT MADE FOR THAT CREDIT CARD
         if(creditCards.includes(transactionInput.name.split(' ')[0])){
             user.wallets.find( (wallet, index) => {
                 if(wallet.walletType === transactionInput.name.split(' ')[0] && wallet.supplier === transactionInput.name.split(' ')[1]){
@@ -177,13 +177,16 @@ module.exports = {
     },
 
     deleteTransaction: async function({ transactionInput}, req) {
+        console.log('deleting')
         if(!req.isAuth) {
+            console.log('not auth')
             const error = new Error('Not authenticated.')
             error.code = 401;
             throw error
         }
         const user = await User.findById(req.userId)
         if(!user) {
+            console.log('no user')
             const error = new Error('User not found.')
             error.code = 401;
             throw error
@@ -201,9 +204,6 @@ module.exports = {
         user.monthlyReports.forEach( (report, indexReport) => {
             report.transactions.find( (transaction, indexTransaction) => {
                 if(transaction._id === transactionInput._id){
-
-                    console.log('III', indexReport)
-
                    deletedTransaction = user.monthlyReports[indexReport].transactions[indexTransaction]
                    if(deletedTransaction.transactionType === 'income'){
                        isIncome = true
@@ -255,15 +255,24 @@ module.exports = {
                     return true
                 }
             })
-            // CANCEL THE AMOUNT IN WALLET
-            user.wallets.find((wallet, index) => {
+
+            let usedWalletIndex
+            user.wallets.find( (wallet, index) => {
                 if(wallet._id === deletedTransaction.usedWalletId){
-                    user.wallets[index].amount -= deletedTransaction.amount
+                    usedWalletIndex = index
+                    return true
                 }
             })
 
-            // CHECK IF THE TRANSACTION IS A PAYMENT TO A CREDIT CARD
             const creditCards = ['Visa', 'MasterCard']
+
+            if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
+                    user.wallets[usedWalletIndex].amount += deletedTransaction.amount
+            } else {
+                    user.wallets[usedWalletIndex].amount -= deletedTransaction.amount
+            }
+
+            // CHECK IF THE TRANSACTION IS A PAYMENT TO A CREDIT CARD
             if(creditCards.includes(deletedTransaction.name.split(' ')[0])){
             user.wallets.find( (wallet, index) => {
                 if(wallet.walletType === deletedTransaction.name.split(' ')[0] && wallet.supplier === deletedTransaction.name.split(' ')[1]){
