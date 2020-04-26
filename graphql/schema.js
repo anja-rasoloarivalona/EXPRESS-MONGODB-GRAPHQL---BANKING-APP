@@ -1,4 +1,5 @@
-const { buildSchema } = require('graphql')
+const { buildSchema, GraphQLList } = require('graphql')
+
 
 module.exports = buildSchema(`
     type Transaction {
@@ -143,16 +144,34 @@ module.exports = buildSchema(`
     }
 
     type DashboardLayoutItem {
-        x: Int,
-        y: Int,
-        w: Int,
-        h: Int,
+        x: Int
+        y: Int
+        w: Int
+        h: Int
         i: String
+        displayed: Boolean
+    }
+
+    input DashboardLayoutItemInput {
+        i: String
+        x: String
+        y: String
+        w: String
+        h: String
+        displayed: String
     }
 
 
     input DashboardLayoutInputData {
-        layout: String
+        available: DashboardLayoutItemInput
+        balance: DashboardLayoutItemInput
+        budget: DashboardLayoutItemInput
+        expenses: DashboardLayoutItemInput
+        goal: DashboardLayoutItemInput
+        history: DashboardLayoutItemInput
+        monthly: DashboardLayoutItemInput
+        transactions: DashboardLayoutItemInput
+        wallet: DashboardLayoutItemInput
     }
 
     type Goal {
@@ -186,8 +205,7 @@ module.exports = buildSchema(`
         deleteTransaction(transactionInput: TransactionInput): User!
         editTransaction(transactionInput: TransactionInput): User!
         setTheme(theme: String!): User!
-        updateDashboardLayout(layoutInput: DashboardLayoutInputData): [DashboardLayoutItem]
-        
+        updateDashboardLayout(input: DashboardLayoutInputData): [DashboardLayoutItem] 
     }
 
     type RootQuery {

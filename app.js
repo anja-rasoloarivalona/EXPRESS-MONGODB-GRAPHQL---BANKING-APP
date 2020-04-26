@@ -32,32 +32,31 @@ app.use((req, res, next) => {
 
 app.use(isAuth)
 
+
 app.use('/graphql', graphHttp({
   schema: graphqlSchema,
   rootValue: graphqlResolver,
   graphiql: true,
-  customFormatErrorFn(err) {
+  customFormatErrorFn: err => {
     if(!err.originalError) {
       return err
     }
-    const data = err.originalError.data;
     const message = err.message || 'An error occured';
     const code = err.originalError.code || 500;
-    return {
+    return ({
       message: message,
-      stauts: code,
-      data: data
-    }
+      status: code
+    })
   }
 }))
 
-app.use((error, req, res, next) => {
-  console.log(error);
-  const status = error.statusCode || 500;
-  const message = error.message;
-  const data = error.data;
-  res.status(status).json({ message: message, data: data });
-});
+// app.use((error, req, res, next) => {
+//   console.log('middleware app reached', error);
+//   const status = error.statusCode || 500;
+//   const message = error.message;
+//   const data = error.data;
+//   res.status(status).json({ message: message, data: data });
+// });
 
 mongoose
   .connect(`mongodb+srv://anja:anjanirina@cluster0-wijrw.mongodb.net/bank`, { useNewUrlParser: true, useUnifiedTopology: true } )
