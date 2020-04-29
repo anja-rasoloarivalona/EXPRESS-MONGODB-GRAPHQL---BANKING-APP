@@ -33,7 +33,7 @@ module.exports = {
             email: userInput.email,
             name: userInput.name,
             password: hashedPassword,
-            status: 'created'
+            status: 'setup'
         })
         const createdUser = await user.save()
         const token = jwt.sign({

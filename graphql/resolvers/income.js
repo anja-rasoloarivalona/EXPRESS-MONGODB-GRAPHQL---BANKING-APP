@@ -40,7 +40,8 @@ module.exports = {
             lastPayout: incomeInput.lastPayout,
             nextPayout: nextPayout,
             autoWriting: autoWriting,
-            notification: notification
+            notification: notification,
+            color: incomeInput.color
         }
         user.incomes.push(newIncome)
         await user.save()

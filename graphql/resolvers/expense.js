@@ -16,6 +16,8 @@ module.exports = {
             throw error
         }
 
+        console.log('input', expenseInput)
+
         let newExpense
 
         if(expenseInput.expenseType === 'fixed'){
