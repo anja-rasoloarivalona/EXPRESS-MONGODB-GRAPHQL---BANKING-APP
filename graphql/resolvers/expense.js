@@ -82,7 +82,7 @@ module.exports = {
                     let nextPayout = dateRangeCalculator(expenseInput.frequency, expenseInput.lastPayout)
                     user.expenses[index] = {
                         _id: expense._id,
-                        name: expense.name,
+                        name: expenseInput.name,
                         amount: parseInt(expenseInput.amount),
                         category: expenseInput.category,
                         expenseType: expenseInput.expenseType,

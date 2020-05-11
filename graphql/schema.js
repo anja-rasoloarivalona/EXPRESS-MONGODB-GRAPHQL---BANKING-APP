@@ -4,9 +4,8 @@ const { buildSchema, GraphQLList } = require('graphql')
 module.exports = buildSchema(`
     type Transaction {
         _id: String!
-        shortId: String!
+        budgetId: String!
         date: String!
-        name: String!
         counterparty: String
         amount: Int!
         details: String!
@@ -18,8 +17,9 @@ module.exports = buildSchema(`
 
     input TransactionInput {
         _id: String
+        name: String
+        budgetId: String!
         date: String!
-        name: String!
         counterparty: String
         amount: String!
         details: String!
@@ -33,7 +33,14 @@ module.exports = buildSchema(`
         period: String!
         income: Int
         expense: Int
+        budget: [MonthlyReportsBudget]
         transactions: [Transaction]
+    }
+
+    type MonthlyReportsBudget {
+        _id: String!
+        amount: Int!
+        used: Int
     }
 
     type Income {
@@ -175,13 +182,11 @@ module.exports = buildSchema(`
     }
 
     type Goal {
-        name: String!
         amount: Int!
         date: String!
     }
 
     input UserGoalInputData {
-        name: String!
         amount: String!
         date: String!
     }

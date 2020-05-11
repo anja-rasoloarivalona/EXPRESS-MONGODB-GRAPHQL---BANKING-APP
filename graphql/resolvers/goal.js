@@ -13,7 +13,6 @@ module.exports = {
             throw error
         }
         const goal = {
-            name: goalInput.name,
             amount: parseInt(goalInput.amount),
             date: goalInput.date
         }

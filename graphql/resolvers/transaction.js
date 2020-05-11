@@ -22,86 +22,112 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        // DETERMINE THE TRANSACTION TYPE
+
+        // *****************  DETERMINE TRANSACTION TYPE *********************** //
         let isIncome = false
         let isExpense = false
+        let isExpenseVariable = false
+        let isExpenseFixed = false
+        let expenseAmount = null
         if (transactionInput.transactionType === 'expense'){
             isExpense = true
+            user.expenses.find( expense => {
+                if(expense._id === transactionInput.budgetId){
+                    if(expense.expenseType === 'fixed'){
+                        isExpenseFixed = true
+                    } else {
+                        isExpenseVariable = true
+                        expenseAmount = expense.amount
+                    }
+                }          
+            })
         } else {
             isIncome = true
         }
 
-        // PREPARE AMOUNT DATA
-        const amount = parseInt(transactionInput.amount)
+        // ************************ DETERMINE PERIOD ***************************** //
+        const d = new Date(transactionInput.date)
+        const period = `${d.getMonth() + 1}-${d.getFullYear()}`
 
-        // CALCULATE THE NEW TRANSACTION RANK
-        let rank = 0
 
-        if(!transactionInput.deletedTransaction_shortId){
-            if(user.monthlyReports.length > 0){
-                user.monthlyReports.forEach(report => {
-                    rank += report.transactions.length
-                })
-            }
-        } else {
-            rank = transactionInput.deletedTransaction_shortId
-        }
-
+        // **** ********************PREPARE AMOUNT DATA *****************************//
+        const amount = parseInt(transactionInput.amount) // INTEGER
         let transactionAmount = amount;
         if(isExpense && amount > 0) {
-            transactionAmount = amount * -1
+            transactionAmount = amount * -1 // IF WE NEED THE EXPENSE TO BE NEGATIVE
         } 
-        
-        // CREATE THE TRANSACTION
+
+        // ***************** STEP 1 : CREATE THE TRANSACTION ***********************//
         const newTransaction = {
             _id: transactionInput.deletedTransaction_shortId ? transactionInput.deletedTransaction_id : uuid(),
-            shortId: transactionInput.deletedTransaction_shortId ? rank : rank + 1,
+            budgetId: transactionInput.budgetId,
             date: transactionInput.date,
-            name: transactionInput.name,
             counterparty: transactionInput.counterparty,
             amount: transactionAmount,
             details: transactionInput.details,
             usedWalletId: transactionInput.usedWalletId,
             status: transactionInput.status,
             transactionType: transactionInput.transactionType,
-            owner: req.userId
+               // ADD A CATEGORY FIELD FOR EXPENSES
+                if (isExpense){
+                    newTransaction.category = transactionInput.category
+                }
         }
 
-        // ADD A CATEGORY FIELD FOR EXPENSES
-        if (isExpense){
-            newTransaction.category = transactionInput.category
-        }
-
-        // CREATE THE PERIOD
-        const d = new Date(transactionInput.date)
-        const period = `${d.getMonth() + 1}-${d.getFullYear()}`
-
-        // CHECK IF WE ALREADY HAVE MONTHLY REPORTS
-        if(user.monthlyReports.length < 1){
-            // CREATE NEW ONE
-            user.monthlyReports = [{
-                period: period,
-                income: isIncome ? amount : 0,
-                expense: isExpense ? amount: 0,
-                transactions: [newTransaction]
-            }]
+        // *************** STEP 2 : UPDATE MONTHLY REPORTS ***************************//
+        const newMonthlyReportBudget = { _id: transactionInput.budgetId }
+        if(isExpense && isExpenseVariable){
+            newMonthlyReportBudget.amount = expenseAmount
+            newMonthlyReportBudget.used = amount
         } else {
+            newMonthlyReportBudget.amount = amount
+        }
+        // STEP 2.1  CHECK IF WE ALREADY HAVE MONTHLY REPORT
+        if(user.monthlyReports.length < 1){
+                 //// ***** CASE 1 : NO REPORT IN THE USER DATA ***** //
+                    // Create the monthly report and insert the new budget built at step 1
+                        user.monthlyReports = [{
+                            period: period,
+                            income: isIncome ? amount : 0,
+                            expense: isExpense ? amount: 0,
+                            budget: [newMonthlyReportBudget],
+                            transactions: [newTransaction]
+                        }]
+        } else { 
+               ////  ***** CASE 2 : THE USER ALREADY HAVE REPORTS ***** //
            const didFindReport = user.monthlyReports.find( (report, index) => {
                 if(report.period === period){
+                 // ***** CASE 2.1 : A REPORT MATCHING THE PERIOD HAS BEEN FOUND ***** //   
                     user.monthlyReports[index].transactions.push(newTransaction)
                     if(isIncome){
                         user.monthlyReports[index].income += amount
                     } else {
                         user.monthlyReports[index].expense += amount
                     }
+                    // Check if the current budgetId is already stored in that report
+                    const didFindCurrentBudgetId =  user.monthlyReports[index].budget.find( (budget, bIndex) => {
+                        if(budget._id === transactionInput.budgetId){
+                            if(isExpense && isExpenseVariable){
+                                user.monthlyReports[index].budget[bIndex].used += amount
+                            } else {
+                                user.monthlyReports[index].budget[bIndex].amount += amount
+                            }
+                            return true
+                        }
+                    })
+                    if(!didFindCurrentBudgetId){
+                        user.monthlyReports[index].budget.push(newMonthlyReportBudget)
+                    }
                     return true
                 }
             })
             if(!didFindReport){
+                // ***** CASE 2.1 : NO REPORT MATCH THE PERIOD  ***** //
                 user.monthlyReports.push({
                     period: period,
                     income: isIncome ? amount : 0,
                     expense: isExpense ? amount: 0,
+                    budget: [newMonthlyReportBudget],
                     transactions: [newTransaction]
                 })
             }
@@ -109,7 +135,6 @@ module.exports = {
 
 
         // UPDATE WALLET
-
         let usedWalletIndex
         user.wallets.find( (wallet, index) => {
             if(wallet._id === transactionInput.usedWalletId){
@@ -117,7 +142,6 @@ module.exports = {
                 return true
             }
         })
-
         const creditCards = ['Visa', 'MasterCard']
 
         if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
@@ -125,7 +149,6 @@ module.exports = {
         } else {
                 user.wallets[usedWalletIndex].amount += transactionAmount
         }
-
         // UPDATE CREDIT CARD IF THE TRANSACTION IS A PAYMENT MADE FOR THAT CREDIT CARD
         if(creditCards.includes(transactionInput.name.split(' ')[0])){
             user.wallets.find( (wallet, index) => {
@@ -135,7 +158,6 @@ module.exports = {
                 }
             })
         }
-
         // UPDATE INCOME DATE IF INCOME
         if(isIncome){
             user.incomes.find( (income, index) => {
@@ -177,7 +199,6 @@ module.exports = {
     },
 
     deleteTransaction: async function({ transactionInput}, req) {
-        console.log('deleting')
         if(!req.isAuth) {
             console.log('not auth')
             const error = new Error('Not authenticated.')
@@ -200,6 +221,9 @@ module.exports = {
         let deletedTransaction, iReport, iTransaction;
         let isIncome = false
         let isExpense = false
+        let isExpenseFixed = false
+        let isExpenseVariable = false
+
 
         user.monthlyReports.forEach( (report, indexReport) => {
             report.transactions.find( (transaction, indexTransaction) => {
@@ -209,6 +233,15 @@ module.exports = {
                        isIncome = true
                    } else {
                        isExpense = true
+                       user.expenses.find(expense => {
+                           if(expense._id === transactionInput.budgetId){
+                               if(expense.expenseType === 'fiexd'){
+                                   isExpenseFixed = true
+                               } else {
+                                   isExpenseVariable = true
+                               }
+                           }
+                       })
                    }
                    iReport = indexReport
                    iTransaction = indexTransaction 
@@ -216,6 +249,7 @@ module.exports = {
                 }
             })
         })
+    
 
         const dp = new Date(deletedTransaction.date)
         const deletedTransactionPeriod = `${dp.getMonth() + 1}-${dp.getFullYear()}`
@@ -224,7 +258,7 @@ module.exports = {
         if(isIncome){
             // rollsback income
             user.incomes.find( (income, index) => {
-                if(income.name === deletedTransaction.name){
+                if(income._id === deletedTransaction.budgetId){
                     user.incomes[index].nextPayout = user.incomes[index].lastPayout
                     user.incomes[index].lastPayout = dateRangeCalculator(user.incomes[index].frequency, user.incomes[index].lastPayout, true)
                     return true
@@ -239,11 +273,17 @@ module.exports = {
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].income -= deletedTransaction.amount
 
+            user.monthlyReports[iReport].budget.find((budget, iBudget) => {
+                if(budget._id === transactionInput.budgetId){
+                    user.monthlyReports[iReport].budget[iBudget].amount -= deletedTransaction.amount
+                }
+            })
+
         }
         if(isExpense){
             // rollback expense
             user.expenses.find( (expense, index) => {
-                if(expense.name === deletedTransaction.name){
+                if(expense._id === deletedTransaction.budgetId){
                     if(expense.expenseType === 'variable' && user.expenses[index].currentPeriod === deletedTransactionPeriod){
                         user.expenses[index].used += deletedTransaction.amount
                     }
@@ -265,7 +305,6 @@ module.exports = {
             })
 
             const creditCards = ['Visa', 'MasterCard']
-
             if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
                     user.wallets[usedWalletIndex].amount += deletedTransaction.amount
             } else {
@@ -273,17 +312,29 @@ module.exports = {
             }
 
             // CHECK IF THE TRANSACTION IS A PAYMENT TO A CREDIT CARD
-            if(creditCards.includes(deletedTransaction.name.split(' ')[0])){
-            user.wallets.find( (wallet, index) => {
-                if(wallet.walletType === deletedTransaction.name.split(' ')[0] && wallet.supplier === deletedTransaction.name.split(' ')[1]){
+            user.wallets.find((wallet, index) => {
+                if(wallet._id === deletedTransaction.budgetId){
                     user.wallets[index].amount -= deletedTransaction.amount
-                    return true
                 }
-                })
-            }
+            })
+
+            // if(creditCards.includes(deletedTransaction.name.split(' ')[0])){
+            // user.wallets.find( (wallet, index) => {
+            //     if(wallet.walletType === deletedTransaction.name.split(' ')[0] && wallet.supplier === deletedTransaction.name.split(' ')[1]){
+            //         user.wallets[index].amount -= deletedTransaction.amount
+            //         return true
+            //     }
+            //     })
+            // }
 
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].expense +=deletedTransaction.amount
+
+            user.monthlyReports[iReport].budget.find((budget, iBudget) => {
+                if(budget._id === transactionInput.budgetId){
+                    user.monthlyReports[iReport].budget[iBudget].used += deletedTransaction.amount
+                }
+            })
         }
 
 
@@ -295,18 +346,18 @@ module.exports = {
         // CHECK IF WE ARE EDITING
         if(isEditing){
             // Pass on all the correct data for the new transaction to be added 
-            let amount = transactionInput.amount
-            if(transactionInput.transactionType === 'expense' && amount > 0){
-                amount = amount * -1
-            }
-            if(transactionInput.transactionType === 'income' && amount < 0){
-                amount = amount * -1
-            }
+            // let amount = transactionInput.amount
+            // if(transactionInput.transactionType === 'expense' && amount > 0){
+            //     amount = amount * -1
+            // }
+            // if(transactionInput.transactionType === 'income' && amount < 0){
+            //     amount = amount * -1
+            // }
 
             const data = {
                 transactionInput : {
                     ...transactionInput,
-                    amount: amount,
+                    amount: transactionInput.amount,
                     deletedTransaction_id: deletedTransaction._id,
                     deletedTransaction_shortId: deletedTransaction.shortId
                 }

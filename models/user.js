@@ -24,21 +24,22 @@ const userSchema = new Schema({
       period: String,
       income: Number,
       expense: Number,
+      budget: [{
+        _id: String,
+        amount: Number,
+        used: Number,
+      }],
       transactions: [
         {
           _id: {
             type: String,
             required: true,
           },
-          shortId: {
+          budgetId: {
             type: String, 
             required: true
           },
           date: {
-              type: String, 
-              required: true
-          },
-          name: {
               type: String, 
               required: true
           },
