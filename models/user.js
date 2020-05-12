@@ -63,8 +63,7 @@ const userSchema = new Schema({
           transactionType: {
               type: String, 
               required: true
-          },
-          category: String,
+          }
         }
       ]
   }],

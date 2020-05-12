@@ -12,7 +12,6 @@ module.exports = buildSchema(`
         usedWalletId: String!
         status: String!
         transactionType: String!
-        category: String,
     }
 
     input TransactionInput {
@@ -26,7 +25,6 @@ module.exports = buildSchema(`
         usedWalletId: String!
         status: String!
         transactionType: String!
-        category: String
     }
 
     type MonthlyReports {
@@ -89,6 +87,7 @@ module.exports = buildSchema(`
         category: String!
         expenseType: String!
         color: String
+        currentPeriod: String
     }
 
     input ExpenseInputData {

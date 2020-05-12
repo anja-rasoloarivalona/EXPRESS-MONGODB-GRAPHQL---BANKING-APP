@@ -161,7 +161,7 @@ module.exports = {
         // UPDATE INCOME DATE IF INCOME
         if(isIncome){
             user.incomes.find( (income, index) => {
-                if(income.name === transactionInput.name){
+                if(income._id=== transactionInput.budgetId){
                     user.incomes[index].lastPayout = transactionInput.date
                     user.incomes[index].nextPayout = dateRangeCalculator(income.frequency, transactionInput.date).toLocaleDateString() 
                     return true
@@ -174,7 +174,7 @@ module.exports = {
             let isFixed = false
             let isVariable = false
             user.expenses.find( (expense, index) => {
-                if(expense.name === transactionInput.name){
+                if(expense._id === transactionInput.budgetId){
                     if(user.expenses[index].expenseType === 'variable'){
                         isVariable = true
                     } else {
