@@ -235,7 +235,7 @@ module.exports = {
                        isExpense = true
                        user.expenses.find(expense => {
                            if(expense._id === transactionInput.budgetId){
-                               if(expense.expenseType === 'fiexd'){
+                               if(expense.expenseType === 'fixed'){
                                    isExpenseFixed = true
                                } else {
                                    isExpenseVariable = true
