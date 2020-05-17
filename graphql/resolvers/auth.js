@@ -2,6 +2,14 @@ const bcrypt = require('bcryptjs');
 const validator = require('validator');
 const jwt = require('jsonwebtoken')
 const User = require('../../models/user');
+const nodemailer = require('nodemailer');
+const sendGridTransport = require('nodemailer-sendgrid-transport');
+
+const transporter = nodemailer.createTransport(sendGridTransport({
+    auth: {
+        api_key: process.env.NODEMAILER_API_KEY
+    }
+}));
 
 module.exports = {
     createUser: async function({ userInput }, req) {
@@ -38,18 +46,40 @@ module.exports = {
                 theme: 'light-green'
             }
         })
-        const createdUser = await user.save()
-        const token = jwt.sign({
-            userId: user._id.toString(),
-            email: user.email
-        }, 'infiowenfew123', { expiresIn: '24h'})
 
-        return {
-            token: token,
-            user: {
-                ...createdUser._doc, 
-                _id: createdUser._id.toString()
+        const isEmailSent = await transporter.sendMail({
+            to: userInput.email,
+            from: 'rasoloanja@gmail.com',
+            subject: 'Here is your validation code',
+            html: `<div>
+                      <div>Hello ${userInput.name},</div>
+                      <br>
+                      <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
+                      <br>
+                      <div><b>123456</b></div>
+                      <br>
+                      <div>Thank you!</div>
+                   <div>`
+        })
+
+        if(isEmailSent){
+            const createdUser = await user.save()
+            const token = jwt.sign({
+                userId: user._id.toString(),
+                email: user.email
+            }, 'infiowenfew123', { expiresIn: '24h'})
+    
+            return {
+                token: token,
+                user: {
+                    ...createdUser._doc, 
+                    _id: createdUser._id.toString()
+                }
             }
+        } else {
+            const error = new Error('Email not sent');
+            error.code = 401;
+            throw error
         }
     },
     login: async function({ email, password}) {
@@ -90,6 +120,16 @@ module.exports = {
             error.statusCode = 404
             throw error
         }
+        // const sgMail = require('@sendgrid/mail');
+        // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+        // const msg = {
+        // to: 'test@example.com',
+        // from: 'test@example.com',
+        // subject: 'Sending with Twilio SendGrid is Fun',
+        // text: 'and easy to do anywhere, even with Node.js',
+        // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+        // };
+        // sgMail.send(msg);
         return user
     }  
 }

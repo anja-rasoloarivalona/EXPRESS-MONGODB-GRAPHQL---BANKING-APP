@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
+    "start": "NODE_ENV=production MONGO_USER=anja MONGO_PASSWORD=anjanirina NODEMAILER_API_KEY=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 node app.js",
+    "start:dev": "nodemon app.js"
   },
   "author": "anja rasoloarivalona",
   "license": "ISC",
@@ -19,6 +19,8 @@
     "graphql": "^14.6.0",
     "jsonwebtoken": "^8.3.0",
     "mongoose": "^5.3.2",
+    "nodemailer": "^6.4.6",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "uuidv4": "^6.0.6",
     "validator": "^12.2.0"
   },
