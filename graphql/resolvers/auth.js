@@ -37,14 +37,16 @@ module.exports = {
             throw error
         };
         const hashedPassword = await bcrypt.hash(userInput.password, 12);
+        const verificationCode = Math.floor(100000 + Math.random() * 900000)
         const user = new User ({
             email: userInput.email,
             name: userInput.name,
             password: hashedPassword,
-            status: 'setup',
+            status: 'setup-verify-code',
             settings: {
                 theme: 'light-green'
-            }
+            },
+            verificationCode: verificationCode
         })
 
         const isEmailSent = await transporter.sendMail({
@@ -56,7 +58,7 @@ module.exports = {
                       <br>
                       <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
                       <br>
-                      <div><b>123456</b></div>
+                      <div><b>${verificationCode}</b></div>
                       <br>
                       <div>Thank you!</div>
                    <div>`
@@ -120,16 +122,28 @@ module.exports = {
             error.statusCode = 404
             throw error
         }
-        // const sgMail = require('@sendgrid/mail');
-        // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-        // const msg = {
-        // to: 'test@example.com',
-        // from: 'test@example.com',
-        // subject: 'Sending with Twilio SendGrid is Fun',
-        // text: 'and easy to do anywhere, even with Node.js',
-        // html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-        // };
-        // sgMail.send(msg);
         return user
-    }  
+    }  ,
+    verifyUserCode: async function({code}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user){
+            const error = new Error('No user found');
+            error.statusCode = 404
+            throw error
+        }
+        if(parseInt(code) === user.verificationCode){
+            user.status = 'setup'
+            await user.save()
+            return 'succeeded'
+        } else {
+            const error = new Error('The code is incorrect. Please enter another one')
+            error.code = 401
+            throw error
+        }
+    }
 }

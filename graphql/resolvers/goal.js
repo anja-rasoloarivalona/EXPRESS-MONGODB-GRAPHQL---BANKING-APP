@@ -13,9 +13,7 @@ module.exports = {
             error.code = 401;
             throw error
         }
-        console.log('user status',user.status)
         if(user.status === 'setup'){
-            console.log('yes')
             const layout = this.setDefaultDashboardLayout(user)
             user.settings.dashboardLayout = layout
         }

@@ -10,6 +10,10 @@ const userSchema = new Schema({
     type: String,
     required: true
   },
+  verificationCode: {
+    type: Number,
+    required: true
+  },
   name: {
     type: String,
     required: true

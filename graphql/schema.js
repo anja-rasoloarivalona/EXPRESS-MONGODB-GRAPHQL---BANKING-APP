@@ -135,6 +135,7 @@ module.exports = buildSchema(`
         name: String!
         email: String!
         password: String!
+        verificationCode: Int
         status: String!
         monthlyReports: [MonthlyReports]
         wallets: [Wallet!]
@@ -198,6 +199,7 @@ module.exports = buildSchema(`
 
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
+        verifyUserCode(code: String!): String!
         addWallet(walletInput: WalletInputData): Wallet!
         editWallet(walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
