@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import graphHttp from 'express-graphql'
 import cors from 'cors'
 
-import graphqlSchema from './graphql/schematest'
+import graphqlSchema from './graphql/schema'
 import graphqlResolver from './graphql/resolvers'
 
 import isAuth from './middleware/is-auth'
