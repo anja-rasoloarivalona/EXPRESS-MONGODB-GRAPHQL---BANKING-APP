@@ -1,7 +1,7 @@
-const User = require('../../models/user');
-const { uuid } = require('uuidv4')
+import User from '../../models/user'
+import { uuid } from 'uuidv4'
 
-module.exports = {
+export default {
     addWallet: async function({ walletInput}, req) {
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')
@@ -47,8 +47,6 @@ module.exports = {
         user.wallets.find( (wallet, index) => {
             if(wallet._id === walletInput._id){
                 updatedWalletIndex = index
-                console.log('index', index)
-                console.log('tr', updatedWalletIndex)
                 user.wallets[index] = {
                     _id: wallet._id,
                     walletType: walletInput.walletType,
@@ -66,8 +64,6 @@ module.exports = {
             }
         })
         await user.save()
-        console.log('res1', updatedWalletIndex)
-        console.log('res', user.wallets[updatedWalletIndex])
         return user.wallets[updatedWalletIndex]
     },
 }

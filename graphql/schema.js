@@ -116,7 +116,6 @@ module.exports = buildSchema(`
         supplier: String!
         amount: Int!
         creditLimit: Int
-        shortId: String
         color: String!
     }
 
@@ -126,7 +125,6 @@ module.exports = buildSchema(`
         supplier: String!
         amount: String!
         creditLimit: String
-        shortId: String
         color: String!
     }
 
@@ -134,8 +132,6 @@ module.exports = buildSchema(`
         _id: ID!
         name: String!
         email: String!
-        password: String!
-        verificationCode: Int
         status: String!
         monthlyReports: [MonthlyReports]
         wallets: [Wallet!]
@@ -157,6 +153,7 @@ module.exports = buildSchema(`
         h: Int
         i: String
         displayed: Boolean
+        ghostMode: String
     }
 
     input DashboardLayoutItemInput {
@@ -200,6 +197,7 @@ module.exports = buildSchema(`
     type RootMutation {
         createUser(userInput: UserInputData): AuthData!
         verifyUserCode(code: String!): String!
+        resetPassword(email: String!, password: String!, token: String!): String!
         addWallet(walletInput: WalletInputData): Wallet!
         editWallet(walletInput: WalletInputData!): Wallet!
         addIncome(incomeInput: IncomeInputData): Income!
@@ -217,6 +215,8 @@ module.exports = buildSchema(`
     type RootQuery {
         user: User!
         login(email: String!, password: String!): AuthData!
+        sendCodeToResetPassword(email: String!): String!
+        verifyResetPasswordCode(email: String!, code: String!): String!
     }
     schema {
         query: RootQuery

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
@@ -7,8 +7,16 @@ const userSchema = new Schema({
     required: true
   },
   password: {
-    type: String,
-    required: true
+    current: {
+      type: String,
+      required: true
+    },
+    old: [String],
+    resetCode: {
+      code: Number,
+      expiryTime: String,
+      token: String
+    }
   },
   verificationCode: {
     type: Number,
@@ -28,7 +36,7 @@ const userSchema = new Schema({
       period: String,
       income: Number,
       expense: Number,
-      budget: [{
+      details: [{
         _id: String,
         amount: Number,
         used: Number,
@@ -81,7 +89,6 @@ const userSchema = new Schema({
       supplier: String,
       amount: Number,
       creditLimit: Number,
-      shortId: String,
       color: String
     }
   ],
@@ -171,4 +178,4 @@ const userSchema = new Schema({
   }
 }, {timestamps: true});
 
-module.exports = mongoose.model('User', userSchema);
+export default mongoose.model('User', userSchema);

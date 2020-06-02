@@ -1,7 +1,7 @@
-const User = require('../../models/user');
-const { uuid } = require('uuidv4')
+import User from '../../models/user'
+import { uuid } from 'uuidv4'
 
-module.exports = {
+export default {
     addIncome: async function({ incomeInput}, req) {
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=production MONGO_USER=anja MONGO_PASSWORD=anjanirina NODEMAILER_API_KEY=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 node app.js",
-    "start:dev": "nodemon app.js"
+    "start:dev": "nodemon --exec babel-node app.js"
   },
   "author": "anja rasoloarivalona",
   "license": "ISC",
@@ -25,6 +25,9 @@
     "validator": "^12.2.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-latest": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
     "nodemon": "^1.18.4"
   }
 }

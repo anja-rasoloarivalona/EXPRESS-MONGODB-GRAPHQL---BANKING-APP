@@ -1,8 +1,8 @@
-const User = require('../../models/user')
-const dateRangeCalculator = require('../../utilities/DateRangeCalculator')
-const { uuid } = require('uuidv4')
+import User from '../../models/user'
+import { dateRangeCalculator } from '../../utilities/DateRangeCalculator'
+import { uuid } from 'uuidv4'
 
-module.exports = {
+export default {
     editTransaction: async function({transactionInput}, req) {
         let data = {
             transactionInput: {...transactionInput, isEditing: true}

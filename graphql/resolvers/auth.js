@@ -1,9 +1,10 @@
-const bcrypt = require('bcryptjs');
-const validator = require('validator');
-const jwt = require('jsonwebtoken')
-const User = require('../../models/user');
-const nodemailer = require('nodemailer');
-const sendGridTransport = require('nodemailer-sendgrid-transport');
+import bcrypt from 'bcryptjs'
+import validator from 'validator'
+import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
+import User from '../../models/user'
+import sendGridTransport from 'nodemailer-sendgrid-transport'
+import { uuid } from 'uuidv4'
 
 const transporter = nodemailer.createTransport(sendGridTransport({
     auth: {
@@ -11,7 +12,7 @@ const transporter = nodemailer.createTransport(sendGridTransport({
     }
 }));
 
-module.exports = {
+ export default {
     createUser: async function({ userInput }, req) {
         // createUser: async function(args, req) {
         //email => args.userInput.email
@@ -41,7 +42,9 @@ module.exports = {
         const user = new User ({
             email: userInput.email,
             name: userInput.name,
-            password: hashedPassword,
+            password: {
+                current: hashedPassword
+            },
             status: 'setup-verify-code',
             settings: {
                 theme: 'light-green'
@@ -85,13 +88,14 @@ module.exports = {
         }
     },
     login: async function({ email, password}) {
+        console.log('logging in')
         const user = await User.findOne({ email: email})
         if(!user) {
             const error = new Error('User not found.');
             error.code = 401;
             throw error
         }
-        const isEqual = await bcrypt.compare(password, user.password);
+        const isEqual = await bcrypt.compare(password, user.password.current);
         if(!isEqual){
             const error = new Error('Password is invalid');
             error.code = 401;
@@ -119,7 +123,7 @@ module.exports = {
         const user = await User.findById(req.userId)
         if(!user){
             const error = new Error('No user found');
-            error.statusCode = 404
+            error.code = 404
             throw error
         }
         return user
@@ -133,7 +137,7 @@ module.exports = {
         const user = await User.findById(req.userId)
         if(!user){
             const error = new Error('No user found');
-            error.statusCode = 404
+            error.code = 404
             throw error
         }
         if(parseInt(code) === user.verificationCode){
@@ -145,5 +149,109 @@ module.exports = {
             error.code = 401
             throw error
         }
+    },
+    sendCodeToResetPassword: async function({email}, req){
+        const existingUser = await User.findOne({ email: email});
+        if(!existingUser) {
+            console.log('no user found')
+            const error = new Error('No user found');
+            error.code = 404
+            throw error
+        };
+        const resetCode = Math.floor(100000 + Math.random() * 900000)
+        const expiryTime = new Date(new Date().getTime() + 10 * 60000) 
+
+        existingUser.password.resetCode = {
+            code: resetCode,
+            expiryTime: expiryTime
+        }
+
+        const isEmailSent = await transporter.sendMail({
+            to: email,
+            from: 'rasoloanja@gmail.com',
+            subject: 'Here is your validation code',
+            html: `<div>
+                      <div>Hello ${existingUser.name},</div>
+                      <br>
+                      <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
+                      <br>
+                      <div><b>${resetCode}</b></div>
+                      <br>
+                      <div>Thank you!</div>
+                   <div>`
+        })
+
+        if(isEmailSent){
+            await existingUser.save()
+            return 'Code sent'
+        }
+    },
+
+    verifyResetPasswordCode: async function({email, code}, req){
+        const existingUser = await User.findOne({ email: email})
+        if(!existingUser) {
+            const error = new Error('No user found');
+            error.code = 404
+            throw error
+        };
+        if(new Date() > new Date(existingUser.password.resetCode.expiryTime)){
+            const error = new Error('Your code has already expired, please ask for a new one')
+            throw error
+        }
+        if(parseInt(code) !== existingUser.password.resetCode.code){
+            const error = new Error('Code is incorrect. Please try again');
+            error.code = 401;
+            throw error
+        }
+        const token = uuid()
+        existingUser.password.resetCode.token = token
+        await existingUser.save()
+        return token
+    },
+    resetPassword: async function({email, password, token}, req){
+        const errors = []
+        if(validator.isEmpty(password) || !validator.isLength(password, {min: 5})){
+            errors.push('Password too short')
+        }
+
+        if(errors.length > 0){
+            const error = new Error('Password is not valid')
+            error.data = errors;
+            error.code = 422;
+            throw error
+        }
+        const user = await User.findOne({email: email})
+        if(!User) {
+            const error = new Error('No user found');
+            error.code = 404
+            throw error
+        };
+
+        if(user.password.resetCode.token !== token){
+            const error = new Error('Action not authorized')
+            error.code = 404
+            throw error
+        }
+
+        if(user.password.old.length > 0){
+            for(const oldPassword of user.password.old){
+                const isEqual = await bcrypt.compare(password, oldPassword);
+                console.log(isEqual)
+                if(isEqual){
+                    const error = new Error('This is an old password. Please enter a new one')
+                    error.code = 404
+                    throw error
+                }
+            }
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 12);
+
+        user.password.old.push(user.password.current)
+        user.password.current = hashedPassword 
+        user.password.resetCode = {}
+        await user.save()
+        return 'Your password has been updated. Please login'
+
     }
 }

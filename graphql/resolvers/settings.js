@@ -1,6 +1,6 @@
-const User = require('../../models/user');
+import User from '../../models/user'
 
-module.exports = {
+export default {
     updateDashboardLayout: async function ({input
             // balance,
             // budget,

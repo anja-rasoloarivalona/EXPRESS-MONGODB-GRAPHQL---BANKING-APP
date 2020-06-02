@@ -1,4 +1,4 @@
-module.exports = dateRangeCalculator = (frequency, previousDate, rollsBack) => {
+export const dateRangeCalculator = (frequency, previousDate, rollsBack) => {
 let dayLength = 24 * 60 * 60 * 1000
 let prev = new Date(previousDate)
 let prevMonth = prev.getMonth()

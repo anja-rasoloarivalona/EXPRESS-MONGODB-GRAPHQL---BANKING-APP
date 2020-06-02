@@ -1,12 +1,23 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const graphHttp = require('express-graphql');
-const cors = require('cors');
+import express from 'express'
+import bodyParser from 'body-parser'
+import mongoose from 'mongoose'
+import graphHttp from 'express-graphql'
+import cors from 'cors'
 
-const graphqlSchema = require('./graphql/schema');
-const graphqlResolver = require('./graphql/resolvers');
-const isAuth = require('./middleware/is-auth')
+import graphqlSchema from './graphql/schematest'
+import graphqlResolver from './graphql/resolvers'
+
+import isAuth from './middleware/is-auth'
+
+// const express = require('express');
+// const bodyParser = require('body-parser');
+// const mongoose = require('mongoose');
+// const graphHttp = require('express-graphql');
+// const cors = require('cors');
+
+// const graphqlSchema = require('./graphql/schematest');
+// const graphqlResolver = require('./graphql/resolvers');
+// const isAuth = require('./middleware/is-auth')
 
 const app = express();
 
@@ -38,6 +49,7 @@ app.use('/graphql', graphHttp({
   rootValue: graphqlResolver,
   graphiql: true,
   customFormatErrorFn: err => {
+    console.log('throwing error', err)
     if(!err.originalError) {
       return err
     }
@@ -49,14 +61,6 @@ app.use('/graphql', graphHttp({
     })
   }
 }))
-
-// app.use((error, req, res, next) => {
-//   console.log('middleware app reached', error);
-//   const status = error.statusCode || 500;
-//   const message = error.message;
-//   const data = error.data;
-//   res.status(status).json({ message: message, data: data });
-// });
 
 mongoose
   .connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-wijrw.mongodb.net/bank`, { useNewUrlParser: true, useUnifiedTopology: true } )
