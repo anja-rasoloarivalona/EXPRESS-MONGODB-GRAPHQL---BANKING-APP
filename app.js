@@ -7,6 +7,8 @@ import cors from 'cors'
 import graphqlSchema from './graphql/schema'
 import graphqlResolver from './graphql/resolvers'
 
+console.log('schema', graphqlSchema)
+
 import isAuth from './middleware/is-auth'
 
 // const express = require('express');

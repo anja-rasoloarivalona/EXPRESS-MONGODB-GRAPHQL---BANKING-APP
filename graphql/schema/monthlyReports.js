@@ -1,13 +1,13 @@
 export const types = `
-    type MonthlyReports {
+    type MonthlyReport {
         period: String!
         income: Int
         expense: Int
-        details: [MonthlyReportsDetail]
+        details: [MonthlyReportDetails]
         transactions: [Transaction]
     }
 
-    type MonthlyReportsDetail {
+    type MonthlyReportDetails {
         _id: String!
         amount: Int!
         used: Int

@@ -25,6 +25,7 @@ schemas.forEach(schema => {
     inputs.push(schema.inputs)
 })
 
+console.log('schemas', types)
 
 export default buildSchema(`
     ${types.join('\n')}

@@ -1,7 +1,7 @@
 export const types = `
     type AuthData {
         token: String!
-        user: User!
+        user: User
     }
 `;
 

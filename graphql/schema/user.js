@@ -4,7 +4,7 @@ type User {
     name: String!
     email: String!
     status: String!
-    monthlyReports: [MonthlyReports]
+    monthlyReports: [MonthlyReport]
     wallets: [Wallet!]
     incomes: [Income!]
     expenses: [Expense!]
@@ -14,7 +14,7 @@ type User {
 `;
 
 export const queries = `
-    user: User!
+    user: User
 `;
 
 export const inputs = `

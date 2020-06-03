@@ -31,7 +31,7 @@ module.exports = buildSchema(`
         period: String!
         income: Int
         expense: Int
-        budget: [MonthlyReportsBudget]
+        details: [MonthlyReportsBudget]
         transactions: [Transaction]
     }
 
