@@ -90,7 +90,7 @@ export default {
                             period: period,
                             income: isIncome ? amount : 0,
                             expense: isExpense ? amount: 0,
-                            budget: [newMonthlyReportBudget],
+                            details: [newMonthlyReportBudget],
                             transactions: [newTransaction]
                         }]
         } else { 
@@ -127,7 +127,7 @@ export default {
                     period: period,
                     income: isIncome ? amount : 0,
                     expense: isExpense ? amount: 0,
-                    budget: [newMonthlyReportBudget],
+                    details: [newMonthlyReportBudget],
                     transactions: [newTransaction]
                 })
             }
@@ -273,9 +273,9 @@ export default {
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].income -= deletedTransaction.amount
 
-            user.monthlyReports[iReport].budget.find((budget, iBudget) => {
+            user.monthlyReports[iReport].details.find((budget, iBudget) => {
                 if(budget._id === transactionInput.budgetId){
-                    user.monthlyReports[iReport].budget[iBudget].amount -= deletedTransaction.amount
+                    user.monthlyReports[iReport].details[iBudget].amount -= deletedTransaction.amount
                 }
             })
 
@@ -330,9 +330,9 @@ export default {
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].expense +=deletedTransaction.amount
 
-            user.monthlyReports[iReport].budget.find((budget, iBudget) => {
+            user.monthlyReports[iReport].details.find((budget, iBudget) => {
                 if(budget._id === transactionInput.budgetId){
-                    user.monthlyReports[iReport].budget[iBudget].used += deletedTransaction.amount
+                    user.monthlyReports[iReport].details[iBudget].used += deletedTransaction.amount
                 }
             })
         }
