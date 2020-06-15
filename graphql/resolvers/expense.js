@@ -17,20 +17,35 @@ export default {
             throw error
         }
         let newExpense
-        const isExpenseFixed = expenseInput.expenseType === 'fixed'
-        const isExpenseVariable = expenseInput.expenseType === 'variable'
+        const isExpenseFixed = expenseInput.expenseType === 'Fixed'
+        const isExpenseVariable = expenseInput.expenseType === 'Variable'
         const expenseId = uuid()
         const newMonthlyReportBudget = {_id: expenseId}
         const d = new Date()
         const currentPeriod = `${d.getMonth() + 1}-${d.getFullYear()}`
 
+        const newTransaction = {
+            _id: uuid(),
+            budgetId: expenseId,
+            counterparty: '-',
+            details: 'Initialization',
+            usedWalletId: 'Unknown',
+            status: 'paid',
+            transactionType: 'expense'
+        }
+
+        const f = isExpenseVariable ? new Date() : new Date(expenseInput.lastPayout)
+        const newTransactionPeriod = `${f.getMonth() + 1}-${f.getFullYear()}`
+
+        // CREATE NEW EXPENSE
         if(isExpenseFixed){
+            // New fixed expense
             let nextPayout = dateRangeCalculator(expenseInput.frequency, expenseInput.lastPayout)
             newExpense = {
                 _id: expenseId,
-                name: expenseInput.name,
-                amount: parseInt(expenseInput.amount),
                 category: expenseInput.category,
+                subcategory: expenseInput.subcategory,
+                amount: parseInt(expenseInput.amount),
                 expenseType: expenseInput.expenseType,
                 lastPayout: expenseInput.lastPayout,
                 nextPayout: nextPayout,
@@ -39,13 +54,14 @@ export default {
             }
             newMonthlyReportBudget.amount = parseInt(expenseInput.amount)
         } else {
+            // New variable expense
             newExpense = {
                 _id: expenseId,
-                name: expenseInput.name,
+                category: expenseInput.category,
+                subcategory: expenseInput.subcategory,
                 amount: parseInt(expenseInput.amount),
                 used: parseInt(expenseInput.used),
                 currentPeriod: currentPeriod,
-                category: expenseInput.category,
                 expenseType: expenseInput.expenseType,
                 frequency: {
                     counter: 'once',
@@ -59,35 +75,51 @@ export default {
 
         user.expenses.push(newExpense)
 
+        // CREATE NEW TRANSACTION
+        if(isExpenseFixed){
+            // New fixed expense transaction
+            newTransaction.date = expenseInput.lastPayout
+            newTransaction.amount = parseInt(expenseInput.amount) * -1
+        } else {
+            // New variable expense transaction
+            newTransaction.date = new Date().toLocaleDateString()
+            newTransaction.amount = parseInt(expenseInput.used) * -1
+        }
+
+        // CREATE THE MONTHLY REPORT
+
+        const expenseAmount = isExpenseVariable ? parseInt(expenseInput.used) : parseInt(expenseInput.amount)
+
         if(user.monthlyReports.length < 1 ){
             user.monthlyReports = [{
-                period: currentPeriod,
+                period: newTransactionPeriod,
                 income: 0,
-                expense: isExpenseVariable ? parseInt(expenseInput.used) : 0,
-                budget: [newMonthlyReportBudget]
+                expense: expenseAmount,
+                details: [newMonthlyReportBudget],
+                transactions: [newTransaction]
             }]
         } else {
-            if(isExpenseVariable){
                 const didFindReport = user.monthlyReports.find((report, index) => {
-                    if(report.period === currentPeriod){
-                        user.monthlyReports[index].budget.push(newMonthlyReportBudget)
-                        user.monthlyReports[index].expense += parseInt(expenseInput.used)
+                    if(report.period === newTransactionPeriod){
+                        user.monthlyReports[index].details.push(newMonthlyReportBudget)
+                        user.monthlyReports[index].expense += expenseAmount
+                        user.monthlyReports[index].transactions.push(newTransaction)
                         return true
                     }
                 })
                 if(!didFindReport){
                     user.monthlyReports.push({
-                        period: currentPeriod,
+                        period: newTransactionPeriod,
                         income: 0,
-                        expense: parseInt(expenseInput.used),
-                        budget: [newMonthlyReportBudget]
+                        expense: expenseAmount,
+                        details: [newMonthlyReportBudget],
+                        transactions: [newTransaction]
                     })
                 }    
-            }
         }
 
         await user.save()
-        if(expenseInput.expenseType === 'fixed'){
+        if(isExpenseFixed){
             newExpense.nextPayout = newExpense.nextPayout.toLocaleDateString()
         }
         return newExpense

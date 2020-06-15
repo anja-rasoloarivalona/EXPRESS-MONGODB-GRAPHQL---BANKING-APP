@@ -7,19 +7,9 @@ import cors from 'cors'
 import graphqlSchema from './graphql/schema'
 import graphqlResolver from './graphql/resolvers'
 
-console.log('schema', graphqlSchema)
-
 import isAuth from './middleware/is-auth'
 
-// const express = require('express');
-// const bodyParser = require('body-parser');
-// const mongoose = require('mongoose');
-// const graphHttp = require('express-graphql');
-// const cors = require('cors');
 
-// const graphqlSchema = require('./graphql/schematest');
-// const graphqlResolver = require('./graphql/resolvers');
-// const isAuth = require('./middleware/is-auth')
 
 const app = express();
 

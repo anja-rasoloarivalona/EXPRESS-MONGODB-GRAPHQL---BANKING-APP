@@ -51,5 +51,21 @@ export default {
         user.settings.theme = theme
         await user.save()
         return user
+    },
+    setCurrency: async function({ currency }, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+        user.settings.currency = currency
+        await user.save()
+        return 'success'
     }
 }

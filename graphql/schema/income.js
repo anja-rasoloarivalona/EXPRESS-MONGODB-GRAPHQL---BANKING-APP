@@ -1,14 +1,14 @@
 export const types = `
     type Income {
         _id: String!
-        name: String!
+        category: String!
         amount: Int!
-        from: String!
         frequency: Frequency!
         lastPayout: String!
         nextPayout: String!
         autoWriting: Boolean!
         notification: Boolean!
+        details: String
         color: String
     }
 `;
@@ -16,14 +16,14 @@ export const types = `
 export const inputs = `
     input IncomeInputData {
         _id: String
-        name: String!
+        category: String!
         amount: String!
-        from: String!
         frequency: FrequencyInput!
         lastPayout: String!
         autoWriting: String!
         notification: String!
-        color: String!
+        color: String
+        details: String
     }
 `;
 

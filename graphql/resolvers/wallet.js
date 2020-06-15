@@ -17,13 +17,11 @@ export default {
         const newWallet = {
             _id: uuid(),
             walletType: walletInput.walletType,
-            supplier: walletInput.supplier,
+            name: walletInput.name,
             amount: parseInt(walletInput.amount),
-            shortId: walletInput.shortId,
             color: walletInput.color,
-            owner: req.userId
         }
-        if(['Visa', 'MasterCard'].includes(walletInput.walletType)){
+        if(walletInput.walletType === 'Credit card'){
             newWallet.creditLimit = parseInt(walletInput.creditLimit)
         }
         user.wallets.push(newWallet) 

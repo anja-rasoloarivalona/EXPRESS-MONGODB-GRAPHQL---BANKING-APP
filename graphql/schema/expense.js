@@ -1,13 +1,13 @@
 export const types = `
     type Expense {
         _id: String!
-        name: String!
+        category: String!
+        subcategory: String!
         amount: Int!
         used: Int
         lastPayout: String
         nextPayout: String
         frequency: Frequency
-        category: String!
         expenseType: String!
         color: String
         currentPeriod: String
@@ -17,10 +17,10 @@ export const types = `
 export const inputs = `
     input ExpenseInputData {
         _id: String
-        name: String!
+        category: String!
+        subcategory: String!
         amount: String!
         used: String
-        category: String!
         expenseType: String!
         lastPayout: String
         nextPayout: String

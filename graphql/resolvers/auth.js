@@ -52,23 +52,7 @@ const transporter = nodemailer.createTransport(sendGridTransport({
             verificationCode: verificationCode
         })
 
-        const isEmailSent = await transporter.sendMail({
-            to: userInput.email,
-            from: 'rasoloanja@gmail.com',
-            subject: 'Here is your validation code',
-            html: `<div>
-                      <div>Hello ${userInput.name},</div>
-                      <br>
-                      <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
-                      <br>
-                      <div><b>${verificationCode}</b></div>
-                      <br>
-                      <div>Thank you!</div>
-                   <div>`
-        })
-
-        if(isEmailSent){
-            const createdUser = await user.save()
+        const createdUser = await user.save()
             const token = jwt.sign({
                 userId: user._id.toString(),
                 email: user.email
@@ -81,11 +65,41 @@ const transporter = nodemailer.createTransport(sendGridTransport({
                     _id: createdUser._id.toString()
                 }
             }
-        } else {
-            const error = new Error('Email not sent');
-            error.code = 401;
-            throw error
-        }
+
+        // const isEmailSent = await transporter.sendMail({
+        //     to: userInput.email,
+        //     from: 'rasoloanja@gmail.com',
+        //     subject: 'Here is your validation code',
+        //     html: `<div>
+        //               <div>Hello ${userInput.name},</div>
+        //               <br>
+        //               <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
+        //               <br>
+        //               <div><b>${verificationCode}</b></div>
+        //               <br>
+        //               <div>Thank you!</div>
+        //            <div>`
+        // })
+
+        // if(isEmailSent){
+        //     const createdUser = await user.save()
+        //     const token = jwt.sign({
+        //         userId: user._id.toString(),
+        //         email: user.email
+        //     }, 'infiowenfew123', { expiresIn: '24h'})
+    
+        //     return {
+        //         token: token,
+        //         user: {
+        //             ...createdUser._doc, 
+        //             _id: createdUser._id.toString()
+        //         }
+        //     }
+        // } else {
+        //     const error = new Error('Email not sent');
+        //     error.code = 401;
+        //     throw error
+        // }
     },
     login: async function({ email, password}) {
         console.log('logging in')
@@ -254,5 +268,56 @@ const transporter = nodemailer.createTransport(sendGridTransport({
         await user.save()
         return 'Your password has been updated. Please login'
 
+    },
+    finishSetup: async function({}, req) {
+        if(!req.isAuth) {
+            const error = new Error('Not authenticated.')
+            error.code = 401;
+            throw error
+        }
+        const user = await User.findById(req.userId)
+        if(!user) {
+            const error = new Error('User not found.')
+            error.code = 401;
+            throw error
+        }
+        const layout = this.setDefaultDashboardLayout(user)
+        user.settings.dashboardLayout = layout
+        user.status = 'active'
+        user.activeDate = new Date().toString()
+        await user.save()
+        return user
+    },
+    setDefaultDashboardLayout (user) {
+        const layout = [
+            { x: 0, y: 0, w: 4, h: 6, i: 'balance', displayed: true, ghostMode: 'hide' },
+            {x: 8, y: 30, w: 4, h: 20, i: 'calendar', displayed: true, ghostMode: 'display' },
+            { x: 0, y: 12, w: 8, h: 9, i: 'budget', displayed: true, ghostMode: 'hide' },
+            { x: 8, y: 12, w: 4, h: 18, i: 'wallet', displayed: true, ghostMode: 'hide' },
+            { x: 0, y: 34, w: 8, h: 16, i: 'transactions', displayed: true, ghostMode: 'hide' },
+            { x: 4, y: 6, w: 4, h: 6, i: 'goal', displayed: true, ghostMode: 'display' },
+            { x: 4, y: 0, w: 4, h: 6, i: 'monthly', displayed: true, ghostMode: 'hide' },
+            { x: 0, y: 21, w: 8, h: 13, i: 'history', displayed: true, ghostMode: 'display' },
+            { x: 0, y: 6, w: 4, h: 6, i: 'available', displayed: true, ghostMode: 'hide' },
+            { x: 8, y: 0, w: 4, h: 12, i: 'expenses', displayed: true, ghostMode: 'display' }
+        ]
+        layout.find((item, index) => {
+        if (item.i === 'budget') {
+            let budgetHeight = 3
+            user.expenses.forEach(expense => {
+            if (expense.expenseType === 'variable') {
+                budgetHeight = budgetHeight + 3
+            }
+            })
+            layout[index].h = budgetHeight > 9 ? budgetHeight : 9
+        }
+        if (item.i === 'wallet') {
+            layout[index].h = user.wallets.length > 1 ? 4 + (user.wallets.length * 7) : 18
+        }
+        if (item.i === 'transactions') {
+            layout[index].h = 6 + (2 * 3)
+        }
+        })
+        return layout
     }
 }

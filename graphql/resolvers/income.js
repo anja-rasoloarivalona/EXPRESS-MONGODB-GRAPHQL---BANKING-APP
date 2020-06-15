@@ -24,9 +24,9 @@ export default {
 
         const newIncome = {
             _id: newIncomeId,
-            name: incomeInput.name,
+            category: incomeInput.category,
             amount: newIncomeAmount,
-            from: incomeInput.from,
+            details: incomeInput.details,
             frequency: incomeInput.frequency,
             lastPayout: incomeInput.lastPayout,
             nextPayout: newIncomeNextPayout,

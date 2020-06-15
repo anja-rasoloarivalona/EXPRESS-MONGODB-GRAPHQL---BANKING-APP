@@ -4,6 +4,7 @@ type User {
     name: String!
     email: String!
     status: String!
+    activeDate: String
     monthlyReports: [MonthlyReport]
     wallets: [Wallet!]
     incomes: [Income!]

@@ -13,4 +13,5 @@ export const queries = `
 
 export const mutations = `
     resetPassword(email: String!, password: String!, token: String!): String!
+    finishSetup: User
 `

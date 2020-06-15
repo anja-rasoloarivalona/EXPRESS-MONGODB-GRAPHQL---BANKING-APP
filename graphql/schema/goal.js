@@ -1,7 +1,7 @@
 export const types = `
     type Goal {
-        amount: Int!
-        date: String!
+        amount: Int
+        date: String
     }
 `;
 

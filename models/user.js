@@ -32,6 +32,7 @@ const userSchema = new Schema({
     date: String
   },
   status: String,
+  activeDate: String,
   monthlyReports: [{
       period: String,
       income: Number,
@@ -86,7 +87,7 @@ const userSchema = new Schema({
         required: true
       },
       walletType: String,
-      supplier: String,
+      name: String,
       amount: Number,
       creditLimit: Number,
       color: String
@@ -98,7 +99,7 @@ const userSchema = new Schema({
         type: String,
         required: true
       },
-      name: {
+      category: {
         type: String,
         required: true
       },
@@ -106,9 +107,9 @@ const userSchema = new Schema({
           type: Number,
           required: true
       },
-      from: {
+      details: {
           type: String,
-          required: true
+          required: false
       },
       frequency: {
           counter: {
@@ -145,7 +146,11 @@ const userSchema = new Schema({
         type: String,
         required: true
       },
-      name: {
+      category: {
+        type: String,
+        required: true
+      },
+      subcategory: {
         type: String,
         required: true
       },
@@ -155,10 +160,6 @@ const userSchema = new Schema({
       },
       currentPeriod: String,
       used: Number,
-      category: {
-          type: String,
-          required: true
-      },
       expenseType: {
           type: String,
           required: true
@@ -174,7 +175,8 @@ const userSchema = new Schema({
   ],
   settings: {
     dashboardLayout: Array,
-    theme: String
+    theme: String,
+    currency: String
   }
 }, {timestamps: true});
 
