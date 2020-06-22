@@ -2,6 +2,7 @@ export const types = `
     type Income {
         _id: String!
         category: String!
+        subcategory: String!
         amount: Int!
         frequency: Frequency!
         lastPayout: String!

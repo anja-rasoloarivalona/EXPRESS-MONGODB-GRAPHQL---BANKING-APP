@@ -39,6 +39,8 @@ const userSchema = new Schema({
       expense: Number,
       details: [{
         _id: String,
+        category: String,
+        subcategory: String,
         amount: Number,
         used: Number,
       }],
@@ -48,8 +50,12 @@ const userSchema = new Schema({
             type: String,
             required: true,
           },
-          budgetId: {
+          category: {
             type: String, 
+            required: true
+          },
+          subcategory: {
+            type: String,
             required: true
           },
           date: {
@@ -69,14 +75,11 @@ const userSchema = new Schema({
              type: String, 
              required: true
           },
-          status: {
-              type: String, 
-              required: true
-          },
           transactionType: {
               type: String, 
               required: true
-          }
+          },
+          status: String
         }
       ]
   }],
@@ -100,6 +103,10 @@ const userSchema = new Schema({
         required: true
       },
       category: {
+        type: String,
+        required: true
+      },
+      subcategory: {
         type: String,
         required: true
       },

@@ -129,7 +129,6 @@ const transporter = nodemailer.createTransport(sendGridTransport({
         }
     },
     user: async function(args, req) {
-        console.log('getting user')
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')
             error.code = 401;
@@ -313,9 +312,6 @@ const transporter = nodemailer.createTransport(sendGridTransport({
         }
         if (item.i === 'wallet') {
             layout[index].h = user.wallets.length > 1 ? 4 + (user.wallets.length * 7) : 18
-        }
-        if (item.i === 'transactions') {
-            layout[index].h = 6 + (2 * 3)
         }
         })
         return layout

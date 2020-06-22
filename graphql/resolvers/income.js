@@ -17,6 +17,10 @@ export default {
         }
 
         // const currentPeriod = `${new Date().getMonth + 1}-${new Date().getFullYear()}`
+        const newIncomeMetaData = {
+            category: 'Income',
+            subcategory: incomeInput.category
+        }
         const newIncomeId = uuid()
         const newIncomeAmount = parseInt(incomeInput.amount)
         const newIncomeNextPayout = dateRangeCalculator(incomeInput.frequency, incomeInput.lastPayout)
@@ -24,7 +28,7 @@ export default {
 
         const newIncome = {
             _id: newIncomeId,
-            category: incomeInput.category,
+            ...newIncomeMetaData,
             amount: newIncomeAmount,
             details: incomeInput.details,
             frequency: incomeInput.frequency,
@@ -35,16 +39,22 @@ export default {
             color: incomeInput.color
         }
 
-        const newTransaction = {
-            _id: uuid(),
-            budgetId: newIncomeId,
-            date: incomeInput.lastPayout,
-            counterparty: '-',
-            amount: newIncomeAmount,
-            details: 'Initialization',
-            usedWalletId: 'Unknown',
-            status: 'paid',
-            transactionType: 'income'
+        // const newTransaction = {
+        //     _id: uuid(),
+        //     ...newIncomeMetaData,
+        //     date: incomeInput.lastPayout,
+        //     counterparty: '-',
+        //     amount: newIncomeAmount,
+        //     details: 'Initialization',
+        //     usedWalletId: 'Unknown',
+        //     status: 'paid',
+        //     transactionType: 'income'
+        // }
+
+        const newMonthlyReportDetail = {
+            ...newIncomeMetaData,
+            _id: newIncomeId,
+            amount: newIncomeAmount
         }
 
         if(user.monthlyReports.length < 1){
@@ -52,21 +62,15 @@ export default {
                 period: newIncomeLastPayoutPeriod ,
                 income: newIncomeAmount,
                 expense: 0,
-                details: [{
-                    _id: newIncomeId,
-                    amount: newIncomeAmount
-                }],
-                transactions: [newTransaction]
+                details: [newMonthlyReportDetail],
+                transactions: []
             }]
         } else {
             const didFindReport = user.monthlyReports.find((report, index) => {
                 if(report.period === newIncomeLastPayoutPeriod){
                     user.monthlyReports[index].income += newIncomeAmount
-                    user.monthlyReports[index].details.push({
-                        _id: newIncomeId,
-                        amount: newIncomeAmount
-                    })
-                    user.monthlyReports[index].transactions.push(newTransaction)
+                    user.monthlyReports[index].details.push(newMonthlyReportDetail)
+                    // user.monthlyReports[index].transactions.push(newTransaction)
                     return true
                 }
             })
@@ -75,11 +79,8 @@ export default {
                     period: newIncomeLastPayoutPeriod,
                     income: newIncomeAmount,
                     expense: 0,
-                    details: [{
-                        _id: newIncomeId,
-                        amount: newIncomeAmount
-                    }],
-                    transactions: [newTransaction]
+                    details: [newMonthlyReportDetail],
+                    transactions: []
                 })
             }
         }

@@ -1,28 +1,28 @@
 export const types = `
     type Transaction {
         _id: String!
-        budgetId: String!
+        category: String!
+        subcategory: String!
         date: String!
         counterparty: String!
         amount: Int!
         details: String!
         usedWalletId: String!
-        status: String!
         transactionType: String!
+        status: String
     }
 `;
 
 export const inputs = `
     input TransactionInput {
         _id: String
-        name: String
-        budgetId: String!
+        category: String!
+        subcategory: String!
         date: String!
         counterparty: String
         amount: String!
         details: String
         usedWalletId: String!
-        status: String!
         transactionType: String!
     }
 `;

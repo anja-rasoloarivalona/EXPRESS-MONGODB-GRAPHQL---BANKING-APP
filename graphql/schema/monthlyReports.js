@@ -8,7 +8,8 @@ export const types = `
     }
 
     type MonthlyReportDetails {
-        _id: String!
+        category: String!
+        subcategory: String!
         amount: Int!
         used: Int
     }

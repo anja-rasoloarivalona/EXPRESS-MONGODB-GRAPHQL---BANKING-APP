@@ -29,5 +29,6 @@ export const inputs = `
         monthly: DashboardLayoutItemInput
         transactions: DashboardLayoutItemInput
         wallet: DashboardLayoutItemInput
+        calendar: DashboardLayoutItemInput
     }
 `;

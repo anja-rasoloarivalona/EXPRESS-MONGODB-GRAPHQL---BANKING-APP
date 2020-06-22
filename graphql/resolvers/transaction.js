@@ -25,25 +25,37 @@ export default {
 
         // *****************  DETERMINE TRANSACTION TYPE *********************** //
         let isIncome = false
+        let isIncomeBudgeted =  false
         let isExpense = false
+        let isExpenseBudgeted = false
         let isExpenseVariable = false
         let isExpenseFixed = false
-        let expenseAmount = null
-        if (transactionInput.transactionType === 'expense'){
+        let expenseAmount
+        const transactionIsPending = new Date(transactionInput.date) > new Date()
+
+        if(transactionInput.transactionType === 'expense'){
             isExpense = true
-            user.expenses.find( expense => {
-                if(expense._id === transactionInput.budgetId){
+            user.expenses.find(expense => {
+                if(expense.category === transactionInput.category && expense.subcategory === transactionInput.subcategory){
+                    isExpenseBudgeted = true
                     if(expense.expenseType === 'fixed'){
                         isExpenseFixed = true
                     } else {
                         isExpenseVariable = true
                         expenseAmount = expense.amount
                     }
-                }          
+                    return true
+                }
             })
         } else {
             isIncome = true
+            user.incomes.find(income => {
+                if(income.category === transactionInput.category){
+                    isIncomeBudgeted = true
+                }
+            })
         }
+
 
         // ************************ DETERMINE PERIOD ***************************** //
         const d = new Date(transactionInput.date)
@@ -60,108 +72,108 @@ export default {
         // ***************** STEP 1 : CREATE THE TRANSACTION ***********************//
         const newTransaction = {
             _id: transactionInput.deletedTransaction_shortId ? transactionInput.deletedTransaction_id : uuid(),
-            budgetId: transactionInput.budgetId,
+            category: transactionInput.category,
+            subcategory:  transactionInput.subcategory,
             date: transactionInput.date,
             counterparty: transactionInput.counterparty,
             amount: transactionAmount,
             details: transactionInput.details,
             usedWalletId: transactionInput.usedWalletId,
-            status: transactionInput.status,
             transactionType: transactionInput.transactionType,
-               // ADD A CATEGORY FIELD FOR EXPENSES
-                if (isExpense){
-                    newTransaction.category = transactionInput.category
-                }
+            status: transactionIsPending ? 'pending' : 'paid'
         }
 
         // *************** STEP 2 : UPDATE MONTHLY REPORTS ***************************//
-        const newMonthlyReportBudget = { _id: transactionInput.budgetId }
+        const newMonthlyReportDetail = { 
+            category: newTransaction.category,
+            subcategory: newTransaction.subcategory
+        }
         if(isExpense && isExpenseVariable){
-            newMonthlyReportBudget.amount = expenseAmount
-            newMonthlyReportBudget.used = amount
+            newMonthlyReportDetail.amount = expenseAmount
+            newMonthlyReportDetail.used = amount
         } else {
-            newMonthlyReportBudget.amount = amount
+            newMonthlyReportDetail.amount = amount
         }
         // STEP 2.1  CHECK IF WE ALREADY HAVE MONTHLY REPORT
         if(user.monthlyReports.length < 1){
                  //// ***** CASE 1 : NO REPORT IN THE USER DATA ***** //
-                    // Create the monthly report and insert the new budget built at step 1
+                        // Create the monthly report and insert the new budget built at step 1
                         user.monthlyReports = [{
                             period: period,
                             income: isIncome ? amount : 0,
                             expense: isExpense ? amount: 0,
-                            details: [newMonthlyReportBudget],
+                            details: [newMonthlyReportDetail],
                             transactions: [newTransaction]
                         }]
         } else { 
                ////  ***** CASE 2 : THE USER ALREADY HAVE REPORTS ***** //
            const didFindReport = user.monthlyReports.find( (report, index) => {
                 if(report.period === period){
-                 // ***** CASE 2.1 : A REPORT MATCHING THE PERIOD HAS BEEN FOUND ***** //   
+                    // ***** CASE 2.1 : A REPORT MATCHING THE PERIOD HAS BEEN FOUND ***** //   
                     user.monthlyReports[index].transactions.push(newTransaction)
                     if(isIncome){
                         user.monthlyReports[index].income += amount
                     } else {
                         user.monthlyReports[index].expense += amount
                     }
-                    // Check if the current budgetId is already stored in that report
-                    const didFindCurrentBudgetId =  user.monthlyReports[index].budget.find( (budget, bIndex) => {
-                        if(budget._id === transactionInput.budgetId){
+                    // **** CASE 2.1.a : CHECK IF THE NEW TRANSACTION IS ALREADY STORED IN THAT REPORT
+                    const didFindCurrentTransactionDetailInReport =  user.monthlyReports[index].details.find( (detail, dIndex) => {
+                        if(detail.category === newTransaction.category && detail.subcategory === newTransaction.subcategory){
+                            // ALREADY STORED
                             if(isExpense && isExpenseVariable){
-                                user.monthlyReports[index].budget[bIndex].used += amount
+                                user.monthlyReports[index].details[dIndex].used += amount
                             } else {
-                                user.monthlyReports[index].budget[bIndex].amount += amount
+                                user.monthlyReports[index].details[dIndex].amount += amount
                             }
                             return true
                         }
                     })
-                    if(!didFindCurrentBudgetId){
-                        user.monthlyReports[index].budget.push(newMonthlyReportBudget)
+                    if(!didFindCurrentTransactionDetailInReport){
+                            // NOT STORED YET
+                        user.monthlyReports[index].details.push(newMonthlyReportDetail)
                     }
                     return true
                 }
             })
             if(!didFindReport){
-                // ***** CASE 2.1 : NO REPORT MATCH THE PERIOD  ***** //
+                // ***** CASE 3 : NO REPORT MATCH THE PERIOD  ***** //
                 user.monthlyReports.push({
                     period: period,
                     income: isIncome ? amount : 0,
                     expense: isExpense ? amount: 0,
-                    details: [newMonthlyReportBudget],
+                    details: [newMonthlyReportDetail],
                     transactions: [newTransaction]
                 })
             }
         }
 
 
-        // UPDATE WALLET
-        let usedWalletIndex
-        user.wallets.find( (wallet, index) => {
-            if(wallet._id === transactionInput.usedWalletId){
-                usedWalletIndex = index
-                return true
-            }
-        })
-        const creditCards = ['Visa', 'MasterCard']
-
-        if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
-                user.wallets[usedWalletIndex].amount -= transactionAmount
-        } else {
-                user.wallets[usedWalletIndex].amount += transactionAmount
-        }
-        // UPDATE CREDIT CARD IF THE TRANSACTION IS A PAYMENT MADE FOR THAT CREDIT CARD
-        if(creditCards.includes(transactionInput.name.split(' ')[0])){
+        // UPDATE WALLET IF THE TRANSACTION IS NOT PENDING
+        if(!transactionIsPending){
             user.wallets.find( (wallet, index) => {
-                if(wallet.walletType === transactionInput.name.split(' ')[0] && wallet.supplier === transactionInput.name.split(' ')[1]){
-                    user.wallets[index].amount -= amount
+                if(wallet._id === transactionInput.usedWalletId){
+                    if(user.wallets[index].walletType === 'Credit card'){
+                        user.wallets[index].amount -= transactionAmount
+                    } else {
+                            user.wallets[index].amount += transactionAmount
+                    }
                     return true
                 }
             })
         }
+        // UPDATE CREDIT CARD IF THE TRANSACTION IS A PAYMENT MADE FOR THAT CREDIT CARD
+        // if(creditCards.includes(transactionInput.name.split(' ')[0])){
+        //     user.wallets.find( (wallet, index) => {
+        //         if(wallet.walletType === transactionInput.name.split(' ')[0] && wallet.supplier === transactionInput.name.split(' ')[1]){
+        //             user.wallets[index].amount -= amount
+        //             return true
+        //         }
+        //     })
+        // }
         // UPDATE INCOME DATE IF INCOME
-        if(isIncome){
+        if(isIncome && isIncomeBudgeted){
             user.incomes.find( (income, index) => {
-                if(income._id=== transactionInput.budgetId){
+                if(income.category === newTransaction.category && income.subcategory === newTransaction.subcategory){
                     user.incomes[index].lastPayout = transactionInput.date
                     user.incomes[index].nextPayout = dateRangeCalculator(income.frequency, transactionInput.date).toLocaleDateString() 
                     return true
@@ -170,25 +182,15 @@ export default {
         }
 
         // UPDATE EXPENSE DATA IF EXPENSE
-        if(isExpense){
-            let isFixed = false
-            let isVariable = false
+        if(isExpense && isExpenseBudgeted){
             user.expenses.find( (expense, index) => {
-                if(expense._id === transactionInput.budgetId){
-                    if(user.expenses[index].expenseType === 'variable'){
-                        isVariable = true
-                    } else {
-                        isFixed = true
-                    }
-
-                    if(isFixed){
+                if(expense.category === newTransaction.category && expense.subcategory === newTransaction.subcategory){
+                    if(isExpenseFixed){
                         user.expenses[index].lastPayout = transactionInput.date
                         user.expenses[index].nextPayout = dateRangeCalculator(expense.frequency, transactionInput.date).toLocaleDateString()
                     }
-                    if(isVariable){
-                        if(user.expenses[index].currentPeriod === period){
-                            user.expenses[index].used += amount
-                        }        
+                    if(isExpenseVariable && user.expenses[index].currentPeriod === period){
+                        user.expenses[index].used += amount  
                     }
                 }
             })
