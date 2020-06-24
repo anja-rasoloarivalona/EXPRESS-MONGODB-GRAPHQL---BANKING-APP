@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken'
 // const jwt = require('jsonwebtoken')
 
 export default (req, res, next) => {
-    console.log('middlware')
     const authHeader = req.get('Authorization')
     if(!authHeader){
         req.isAuth = false

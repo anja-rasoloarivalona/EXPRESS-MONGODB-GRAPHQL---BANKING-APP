@@ -25,6 +25,7 @@ export const inputs = `
         notification: String!
         color: String
         details: String
+        alreadyUsedThisCurrentMonth: String
     }
 `;
 

@@ -26,6 +26,7 @@ export const inputs = `
         nextPayout: String
         frequency: FrequencyInput
         color: String
+        alreadyUsedThisCurrentMonth: String
     }
 `;
 

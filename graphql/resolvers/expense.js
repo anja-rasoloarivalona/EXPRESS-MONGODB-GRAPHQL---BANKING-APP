@@ -16,6 +16,17 @@ export default {
             error.code = 401;
             throw error
         }
+        const expenseAlreadyExists = user.expenses.find(expense => {
+            if(expense.category === expenseInput.category && expense.subcategory === expenseInput.subcategory){
+                return true
+            }
+        })
+        if(expenseAlreadyExists){
+            const error = new Error('This expenditure has already been budgeted.')
+            error.code = 401
+            throw error
+        }
+
         let newExpense
         const isExpenseFixed = expenseInput.expenseType === 'Fixed'
         const isExpenseVariable = expenseInput.expenseType === 'Variable'
@@ -27,9 +38,8 @@ export default {
         const d = new Date()
         const currentPeriod = `${d.getMonth() + 1}-${d.getFullYear()}`
         let lastPayoutPeriod = null
-
-        // const f = isExpenseVariable ? new Date() : new Date(expenseInput.lastPayout)
-        // const currentPeriod = `${f.getMonth() + 1}-${f.getFullYear()}`
+        const expenseAlreadyUsedThisMonth = expenseInput.alreadyUsedThisCurrentMonth === 'true' ? true : false
+        // console.log('expenseAlreadyUsedThisMonth', expenseAlreadyUsedThisMonth)
 
         // CREATE NEW EXPENSE
         if(isExpenseFixed){
@@ -66,38 +76,14 @@ export default {
                 },
                 color: expenseInput.color
             }
+            // set amount and used -- to be modified
             newMonthlyReportDetail.amount = parseInt(expenseInput.amount)
             newMonthlyReportDetail.used = parseInt(expenseInput.used)
         }
-
         user.expenses.push(newExpense)
 
-        // // CREATE NEW TRANSACTION
-        // const newTransaction = {
-        //     _id: uuid(),
-        //     category: expenseInput.category,
-        //     subcategory: expenseInput.subcategory,
-        //     counterparty: '-',
-        //     details: 'Initialization',
-        //     usedWalletId: 'Unknown',
-        //     status: 'paid',
-        //     transactionType: 'expense'
-        // }
-        
-        // if(isExpenseFixed){
-        //     // New fixed expense transaction
-        //     newTransaction.date = expenseInput.lastPayout
-        //     newTransaction.amount = parseInt(expenseInput.amount) * -1
-        // } else {
-        //     // New variable expense transaction
-        //     newTransaction.date = new Date().toLocaleDateString()
-        //     newTransaction.amount = parseInt(expenseInput.used) * -1
-        // }
-
         // CREATE THE MONTHLY REPORT
-
         const expenseAmount = isExpenseVariable ? parseInt(expenseInput.used) : parseInt(expenseInput.amount)
-
         const newMonthlyReport = {
             period: isExpenseVariable ? currentPeriod : lastPayoutPeriod,
             income: 0,
@@ -105,21 +91,32 @@ export default {
             details: [newMonthlyReportDetail],
             transactions: []
         }
-
         if(user.monthlyReports.length < 1 ){
             user.monthlyReports = [newMonthlyReport]
         } else {
-                const didFindReport = user.monthlyReports.find((report, index) => {
-                    if(report.period === newMonthlyReport.period){
+            const didFindReport = user.monthlyReports.find((report, index) => {
+                if(report.period === newMonthlyReport.period){
+                    // to be modified = doesnt not work - ne need to push smonthing that already exists
+                    // change details amount and used if variable
+                    if(expenseAlreadyUsedThisMonth){
+                        console.log('expense already used')
+                        user.monthlyReports[index].details.find( (detail, dIndex) => {
+                            if(detail.category === expenseInput.category && detail.subcategory === expenseInput.subcategory){
+                                user.monthlyReports[index].details[dIndex].used = newMonthlyReportDetail.used
+                                user.monthlyReports[index].details[dIndex].amount = newMonthlyReportDetail.amount
+                                return true
+                            }
+                        })
+                    } else {
                         user.monthlyReports[index].details.push(newMonthlyReportDetail)
                         user.monthlyReports[index].expense += expenseAmount
-                        // user.monthlyReports[index].transactions.push(newTransaction)
-                        return true
                     }
-                })
-                if(!didFindReport){
-                    user.monthlyReports.push(newMonthlyReport)
-                }    
+                    return true
+                }
+            })
+            if(!didFindReport){
+                user.monthlyReports.push(newMonthlyReport)
+            }    
         }
 
         await user.save()

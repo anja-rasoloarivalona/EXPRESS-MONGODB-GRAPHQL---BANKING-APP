@@ -25,7 +25,8 @@ export default {
         const newIncomeAmount = parseInt(incomeInput.amount)
         const newIncomeNextPayout = dateRangeCalculator(incomeInput.frequency, incomeInput.lastPayout)
         const newIncomeLastPayoutPeriod = `${new Date(incomeInput.lastPayout).getMonth() + 1}-${new Date(incomeInput.lastPayout).getFullYear()}`
-
+        const alreadyUsedThisCurrentMonth = incomeInput.alreadyUsedThisCurrentMonth === 'true' ? true : false
+        console.log('alreadyUsedThisCurrentMonth', alreadyUsedThisCurrentMonth)
         const newIncome = {
             _id: newIncomeId,
             ...newIncomeMetaData,
@@ -68,8 +69,11 @@ export default {
         } else {
             const didFindReport = user.monthlyReports.find((report, index) => {
                 if(report.period === newIncomeLastPayoutPeriod){
-                    user.monthlyReports[index].income += newIncomeAmount
-                    user.monthlyReports[index].details.push(newMonthlyReportDetail)
+                    if(!alreadyUsedThisCurrentMonth){
+                        console.log('doing int because not already used')
+                        user.monthlyReports[index].income += newIncomeAmount
+                        user.monthlyReports[index].details.push(newMonthlyReportDetail)
+                    } 
                     // user.monthlyReports[index].transactions.push(newTransaction)
                     return true
                 }
