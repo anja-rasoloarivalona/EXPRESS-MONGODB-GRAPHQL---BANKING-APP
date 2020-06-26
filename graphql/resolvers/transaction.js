@@ -38,7 +38,7 @@ export default {
             user.expenses.find(expense => {
                 if(expense.category === transactionInput.category && expense.subcategory === transactionInput.subcategory){
                     isExpenseBudgeted = true
-                    if(expense.expenseType === 'fixed'){
+                    if(expense.expenseType === 'Fixed'){
                         isExpenseFixed = true
                     } else {
                         isExpenseVariable = true
@@ -91,6 +91,7 @@ export default {
         if(isExpense && isExpenseVariable){
             newMonthlyReportDetail.amount = expenseAmount
             newMonthlyReportDetail.used = amount
+            newMonthlyReportDetail.amountInitialization = 'transaction'
         } else {
             newMonthlyReportDetail.amount = amount
         }
@@ -237,7 +238,7 @@ export default {
                        isExpense = true
                        user.expenses.find(expense => {
                            if(expense._id === transactionInput.budgetId){
-                               if(expense.expenseType === 'fixed'){
+                               if(expense.expenseType === 'Fixed'){
                                    isExpenseFixed = true
                                } else {
                                    isExpenseVariable = true
@@ -290,7 +291,7 @@ export default {
                         user.expenses[index].used += deletedTransaction.amount
                     }
 
-                    if(expense.expenseType === 'fixed'){
+                    if(expense.expenseType === 'Fixed'){
                         user.expenses[index].nextPayout = user.expenses[index].lastPayout
                         user.expenses[index].lastPayout = dateRangeCalculator(user.expenses[index].frequency, user.expenses[index].lastPayout, true)
                     }

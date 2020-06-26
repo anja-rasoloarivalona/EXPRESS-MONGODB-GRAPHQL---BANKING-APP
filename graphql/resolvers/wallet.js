@@ -48,16 +48,10 @@ export default {
                 user.wallets[index] = {
                     _id: wallet._id,
                     walletType: walletInput.walletType,
-                    supplier: walletInput.supplier,
+                    name: walletInput.name,
                     amount: parseInt(walletInput.amount),
-                    shortId: walletInput.shortId,
-                    color: walletInput.color
-                }
-                if(['Visa', 'MasterCard'].includes(wallet.walletType)){
-                    user.wallets[index] = {
-                        ...user.wallets[index],
-                        creditLimit: walletInput.creditLimit
-                    }
+                    color: walletInput.color,
+                    creditLimit: walletInput.walletType === 'Credit card' ? walletInput.creditLimit : null
                 }
             }
         })

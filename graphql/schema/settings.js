@@ -7,7 +7,7 @@ export const types = `
 `;
 
 export const mutations = `
-    setTheme(theme: String!): User!
+    setTheme(theme: String!): String
     updateDashboardLayout(input: DashboardLayoutInputData): [DashboardLayoutItem]
     setCurrency(currency: String!): String 
 `

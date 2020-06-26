@@ -12,5 +12,6 @@ export const types = `
         subcategory: String!
         amount: Int!
         used: Int
+        usedAmountInit: Int
     }
 `;

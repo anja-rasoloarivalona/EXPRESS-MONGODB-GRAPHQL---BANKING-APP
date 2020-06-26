@@ -48,9 +48,10 @@ export default {
             error.code = 401;
             throw error
         }
+        console.log('setting theme')
         user.settings.theme = theme
         await user.save()
-        return user
+        return 'success'
     },
     setCurrency: async function({ currency }, req) {
         if(!req.isAuth) {

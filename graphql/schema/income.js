@@ -25,11 +25,11 @@ export const inputs = `
         notification: String!
         color: String
         details: String
-        alreadyUsedThisCurrentMonth: String
     }
 `;
 
 export const mutations = `
     addIncome(incomeInput: IncomeInputData): Income!
     editIncome(incomeInput: IncomeInputData): Income!
+    deleteIncome(incomeInputId: String): String
 `

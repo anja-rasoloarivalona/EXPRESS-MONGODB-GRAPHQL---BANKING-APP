@@ -38,11 +38,11 @@ const userSchema = new Schema({
       income: Number,
       expense: Number,
       details: [{
-        _id: String,
         category: String,
         subcategory: String,
         amount: Number,
         used: Number,
+        usedAmountInit: Number
       }],
       transactions: [
         {

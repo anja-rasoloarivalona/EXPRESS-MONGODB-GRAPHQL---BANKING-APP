@@ -289,16 +289,16 @@ const transporter = nodemailer.createTransport(sendGridTransport({
     },
     setDefaultDashboardLayout (user) {
         const layout = [
-            { x: 0, y: 0, w: 4, h: 6, i: 'balance', displayed: true, ghostMode: 'hide' },
-            {x: 8, y: 30, w: 4, h: 20, i: 'calendar', displayed: true, ghostMode: 'display' },
-            { x: 0, y: 12, w: 8, h: 9, i: 'budget', displayed: true, ghostMode: 'hide' },
-            { x: 8, y: 12, w: 4, h: 18, i: 'wallet', displayed: true, ghostMode: 'hide' },
-            { x: 0, y: 34, w: 8, h: 16, i: 'transactions', displayed: true, ghostMode: 'hide' },
-            { x: 4, y: 6, w: 4, h: 6, i: 'goal', displayed: true, ghostMode: 'display' },
-            { x: 4, y: 0, w: 4, h: 6, i: 'monthly', displayed: true, ghostMode: 'hide' },
-            { x: 0, y: 21, w: 8, h: 13, i: 'history', displayed: true, ghostMode: 'display' },
-            { x: 0, y: 6, w: 4, h: 6, i: 'available', displayed: true, ghostMode: 'hide' },
-            { x: 8, y: 0, w: 4, h: 12, i: 'expenses', displayed: true, ghostMode: 'display' }
+            { x: 0, y: 0, w: 4, h: 6, i: 'balance', minH: 6, minW: 3, displayed: true, ghostMode: 'hide' },
+            {x: 8, y: 30, w: 4, h: 20, i: 'calendar', minH: 20, minW: 4, displayed: true, ghostMode: 'display' },
+            { x: 0, y: 12, w: 8, h: 9, i: 'budget', minH: 9, minW: 8, displayed: true, ghostMode: 'hide' },
+            { x: 8, y: 12, w: 4, h: 18, i: 'wallet', minH: 18, minW: 4, displayed: true, ghostMode: 'hide' },
+            { x: 0, y: 34, w: 8, h: 16, i: 'transactions', minW: 8, minH: 16,  displayed: true, ghostMode: 'hide' },
+            { x: 4, y: 6, w: 4, h: 6, i: 'goal', minH: 6, minW: 4, displayed: true, ghostMode: 'display' },
+            { x: 4, y: 0, w: 4, h: 6, i: 'monthly', minH: 6, minW: 3, displayed: true, ghostMode: 'hide' },
+            { x: 0, y: 21, w: 8, h: 13, i: 'history', minH: 13, minW: 8, displayed: true, ghostMode: 'display' },
+            { x: 0, y: 6, w: 4, h: 6, i: 'available', minH: 6, minW: 3, displayed: true, ghostMode: 'hide' },
+            { x: 8, y: 0, w: 4, h: 12, i: 'expenses', minH: 12, minW: 4, displayed: true, ghostMode: 'display' }
         ]
         layout.find((item, index) => {
         if (item.i === 'budget') {

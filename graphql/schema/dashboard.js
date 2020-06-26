@@ -4,6 +4,8 @@ export const types = `
         y: Int
         w: Int
         h: Int
+        minW: Int
+        minH: Int
         i: String
         displayed: Boolean
         ghostMode: String

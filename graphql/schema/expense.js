@@ -12,6 +12,10 @@ export const types = `
         color: String
         currentPeriod: String
     }
+    type DeleteData {
+        success: String
+        deletedId: String
+    }
 `;
 
 export const inputs = `
@@ -33,4 +37,5 @@ export const inputs = `
 export const mutations = `
     addExpense(expenseInput: ExpenseInputData): Expense!
     editExpense(expenseInput: ExpenseInputData): Expense!
+    deleteExpense(expenseInputId: String): DeleteData!
 `
