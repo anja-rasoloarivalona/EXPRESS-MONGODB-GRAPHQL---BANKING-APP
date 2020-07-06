@@ -15,22 +15,17 @@ import isAuth from './middleware/is-auth'
 const app = express();
 
 app.use(helmet())
-app.use(compression())
+// app.use(compression())
 
 app.use('*', cors());
 
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  req.setRequestHeader("Accept", "*/*")
-  req.setRequestHeader('Access-Control-Allow-Origin', "*")
-  req.setRequestHeader('Allow-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE')
-  req.setRequestHeader('Access-Control-Allow-Headers', "Origin, X-Requested-With, Access-Control-Allow-Headers, Content-Type, Authorization")
-  req.setRequestHeader("Content-Type", "application/json")
-  
+  res.setHeader("Content-Type", "application/json")  
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
