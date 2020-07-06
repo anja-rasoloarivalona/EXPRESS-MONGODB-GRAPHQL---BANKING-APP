@@ -19,6 +19,8 @@ export const inputs = `
         y: String
         w: String
         h: String
+        minW: String
+        minH: String
         displayed: String
     }
     input DashboardLayoutInputData {

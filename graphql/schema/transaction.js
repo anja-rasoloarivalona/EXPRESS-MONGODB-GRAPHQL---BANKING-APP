@@ -25,10 +25,13 @@ export const inputs = `
         usedWalletId: String!
         transactionType: String!
     }
+    input TransactionId {
+        _id: String!
+    }
 `;
 
 export const mutations = `
     addTransaction(transactionInput: TransactionInput): User!
-    deleteTransaction(transactionInput: TransactionInput): User!
+    deleteTransaction(transactionInput: TransactionId): User!
     editTransaction(transactionInput: TransactionInput): User!
 `

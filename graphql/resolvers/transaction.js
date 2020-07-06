@@ -4,6 +4,7 @@ import { uuid } from 'uuidv4'
 
 export default {
     editTransaction: async function({transactionInput}, req) {
+        console.log('editing transaction', transactionInput)
         let data = {
             transactionInput: {...transactionInput, isEditing: true}
         }
@@ -91,7 +92,7 @@ export default {
         if(isExpense && isExpenseVariable){
             newMonthlyReportDetail.amount = expenseAmount
             newMonthlyReportDetail.used = amount
-            newMonthlyReportDetail.amountInitialization = 'transaction'
+            newMonthlyReportDetail.amountInitialization = 0
         } else {
             newMonthlyReportDetail.amount = amount
         }
@@ -222,27 +223,44 @@ export default {
         }
     
         let deletedTransaction, iReport, iTransaction;
+
         let isIncome = false
+        let isIncomeBudgeted = false
+        let incomeIndex = null
+
         let isExpense = false
+        let isExpenseBudgeted = false
+        let expenseIndex = null
+
         let isExpenseFixed = false
         let isExpenseVariable = false
 
-
-        user.monthlyReports.forEach( (report, indexReport) => {
-            report.transactions.find( (transaction, indexTransaction) => {
+        // PREPARE DATA
+        user.monthlyReports.forEach((report, indexReport) => {
+            report.transactions.find((transaction, indexTransaction) => {
                 if(transaction._id === transactionInput._id){
                    deletedTransaction = user.monthlyReports[indexReport].transactions[indexTransaction]
                    if(deletedTransaction.transactionType === 'income'){
                        isIncome = true
+                       user.incomes.find((income, i) => {
+                           if(income.subcategory === deletedTransaction.subcategory){
+                               isIncomeBudgeted = true
+                               incomeIndex = i
+                           }
+                           return true
+                       })
                    } else {
                        isExpense = true
-                       user.expenses.find(expense => {
-                           if(expense._id === transactionInput.budgetId){
+                       user.expenses.find((expense, i) => {
+                           if(expense.category === deletedTransaction.category && expense.subcategory === deletedTransaction.subcategory){
+                               isExpenseBudgeted = true
+                               expenseIndex = i
                                if(expense.expenseType === 'Fixed'){
                                    isExpenseFixed = true
                                } else {
                                    isExpenseVariable = true
                                }
+                               return true
                            }
                        })
                    }
@@ -253,20 +271,16 @@ export default {
             })
         })
     
-
         const dp = new Date(deletedTransaction.date)
         const deletedTransactionPeriod = `${dp.getMonth() + 1}-${dp.getFullYear()}`
 
-        // CANCEL TRANSACTION IN EITHER INCOME OR EXPENSE
+        // CANCEL TRANSACTION
         if(isIncome){
-            // rollsback income
-            user.incomes.find( (income, index) => {
-                if(income._id === deletedTransaction.budgetId){
-                    user.incomes[index].nextPayout = user.incomes[index].lastPayout
-                    user.incomes[index].lastPayout = dateRangeCalculator(user.incomes[index].frequency, user.incomes[index].lastPayout, true)
-                    return true
-                }
-            })
+            // ROLLS BACK INCOME IF NEEDED
+            if(isIncomeBudgeted){
+                user.incomes[incomeIndex].nextPayout = user.incomes[incomeIndex].lastPayout
+                user.incomes[incomeIndex].lastPayout = dateRangeCalculator(user.incomes[incomeIndex].frequency, user.incomes[incomeIndex].lastPayout, true)
+            }
             // CANCEL THE AMOUNT IN WALLET
             user.wallets.find((wallet, index) => {
                 if(wallet._id === deletedTransaction.usedWalletId){
@@ -275,51 +289,45 @@ export default {
             })
             // CANCEL TRANSACTION IN MONTHLY REPORTS
             user.monthlyReports[iReport].income -= deletedTransaction.amount
-
-            user.monthlyReports[iReport].details.find((budget, iBudget) => {
-                if(budget._id === transactionInput.budgetId){
-                    user.monthlyReports[iReport].details[iBudget].amount -= deletedTransaction.amount
+            user.monthlyReports[iReport].details.find((detail, iDetail) => {
+                if(detail.subcategory === deletedTransaction.subcategory){
+                    user.monthlyReports[iReport].details[iDetail].amount -= deletedTransaction.amount
                 }
             })
 
         }
         if(isExpense){
-            // rollback expense
-            user.expenses.find( (expense, index) => {
-                if(expense._id === deletedTransaction.budgetId){
-                    if(expense.expenseType === 'variable' && user.expenses[index].currentPeriod === deletedTransactionPeriod){
-                        user.expenses[index].used += deletedTransaction.amount
-                    }
-
-                    if(expense.expenseType === 'Fixed'){
-                        user.expenses[index].nextPayout = user.expenses[index].lastPayout
-                        user.expenses[index].lastPayout = dateRangeCalculator(user.expenses[index].frequency, user.expenses[index].lastPayout, true)
-                    }
-                    return true
+            // ROLLS BACK EXPENSE IF NEEDED
+            if(isExpenseBudgeted){
+                if(isExpenseVariable && user.expenses[expenseIndex].currentPeriod === deletedTransactionPeriod){
+                    user.expenses[expenseIndex].used += deletedTransaction.amount
                 }
-            })
-
-            let usedWalletIndex
+                if(isExpenseFixed){
+                    user.expenses[expenseIndex].nextPayout = user.expenses[expenseIndex].lastPayout
+                    user.expenses[expenseIndex].lastPayout = dateRangeCalculator(user.expenses[expenseIndex].frequency, user.expenses[expenseIndex].lastPayout, true)
+                }
+            }
+            // CANCEL THE AMOUNT IN WALLET
+            let usedWalletIndex, usedWalletType
             user.wallets.find( (wallet, index) => {
                 if(wallet._id === deletedTransaction.usedWalletId){
                     usedWalletIndex = index
+                    usedWalletType = wallet.walletType
                     return true
                 }
             })
-
-            const creditCards = ['Visa', 'MasterCard']
-            if(creditCards.includes(user.wallets[usedWalletIndex].walletType)){
-                    user.wallets[usedWalletIndex].amount += deletedTransaction.amount
+            if(usedWalletType === 'Credit card'){
+                user.wallets[usedWalletIndex].amount += deletedTransaction.amount
             } else {
-                    user.wallets[usedWalletIndex].amount -= deletedTransaction.amount
+                user.wallets[usedWalletIndex].amount -= deletedTransaction.amount
             }
 
             // CHECK IF THE TRANSACTION IS A PAYMENT TO A CREDIT CARD
-            user.wallets.find((wallet, index) => {
-                if(wallet._id === deletedTransaction.budgetId){
-                    user.wallets[index].amount -= deletedTransaction.amount
-                }
-            })
+            // user.wallets.find((wallet, index) => {
+            //     if(wallet._id === deletedTransaction.budgetId){
+            //         user.wallets[index].amount -= deletedTransaction.amount
+            //     }
+            // })
 
             // if(creditCards.includes(deletedTransaction.name.split(' ')[0])){
             // user.wallets.find( (wallet, index) => {
@@ -331,11 +339,14 @@ export default {
             // }
 
             // CANCEL TRANSACTION IN MONTHLY REPORTS
-            user.monthlyReports[iReport].expense +=deletedTransaction.amount
-
-            user.monthlyReports[iReport].details.find((budget, iBudget) => {
-                if(budget._id === transactionInput.budgetId){
-                    user.monthlyReports[iReport].details[iBudget].used += deletedTransaction.amount
+            user.monthlyReports[iReport].expense += deletedTransaction.amount
+            user.monthlyReports[iReport].details.find((detail, iDetail) => {
+                if(detail.category === deletedTransaction.category && detail.subcategory === deletedTransaction.subcategory){
+                    if(user.monthlyReports[iReport].details[iDetail].used){
+                        user.monthlyReports[iReport].details[iDetail].used += deletedTransaction.amount
+                    } else {
+                        user.monthlyReports[iReport].details[iDetail].amount += deletedTransaction.amount
+                    }
                 }
             })
         }
@@ -348,21 +359,11 @@ export default {
 
         // CHECK IF WE ARE EDITING
         if(isEditing){
-            // Pass on all the correct data for the new transaction to be added 
-            // let amount = transactionInput.amount
-            // if(transactionInput.transactionType === 'expense' && amount > 0){
-            //     amount = amount * -1
-            // }
-            // if(transactionInput.transactionType === 'income' && amount < 0){
-            //     amount = amount * -1
-            // }
-
             const data = {
                 transactionInput : {
                     ...transactionInput,
                     amount: transactionInput.amount,
-                    deletedTransaction_id: deletedTransaction._id,
-                    deletedTransaction_shortId: deletedTransaction.shortId
+                    deletedTransaction_id: deletedTransaction._id
                 }
             }
            const res = await this.addTransaction(data, req)

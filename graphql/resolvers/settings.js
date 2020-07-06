@@ -2,14 +2,6 @@ import User from '../../models/user'
 
 export default {
     updateDashboardLayout: async function ({input
-            // balance,
-            // budget,
-            // expenses,
-            // goal,
-            // history,
-            // monthly,
-            // transactions,
-            // wallet
         }, req) {
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')
