@@ -20,9 +20,6 @@ app.use('*', cors());
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
 
-app.use(helmet())
-app.use(compression())
-
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -37,6 +34,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(helmet())
+app.use(compression())
 app.use(isAuth)
 
 
