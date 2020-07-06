@@ -17,7 +17,10 @@ const app = express();
 app.use(helmet())
 app.use(compression())
 
-app.use('*', cors());
+app.use(cors({
+  origin: 'http://localhost:8080/',
+  credentials: true
+}));
 
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
