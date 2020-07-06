@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import graphHttp from 'express-graphql'
 import cors from 'cors'
 import helmet from 'helmet'
+import compression from 'compression'
 import graphqlSchema from './graphql/schema'
 import graphqlResolver from './graphql/resolvers'
 
@@ -20,6 +21,7 @@ app.use('*', cors());
 app.use(bodyParser.json()); // application/json
 
 app.use(helmet())
+app.use(compression())
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

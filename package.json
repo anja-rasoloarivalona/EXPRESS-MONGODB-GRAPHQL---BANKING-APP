@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "12.14.1"
+  },
   "scripts": {
     "start": "NODE_ENV=production MONGO_USER=anja MONGO_PASSWORD=anjanirina NODEMAILER_API_KEY=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 node app.js",
     "start:dev": "nodemon --exec babel-node app.js"
@@ -12,6 +15,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
+    "compression": "^1.7.4",
     "cors": "^2.8.5",
     "express": "^4.16.3",
     "express-graphql": "^0.9.0",
