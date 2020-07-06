@@ -4,7 +4,6 @@ import { uuid } from 'uuidv4'
 
 export default {
     editTransaction: async function({transactionInput}, req) {
-        console.log('editing transaction', transactionInput)
         let data = {
             transactionInput: {...transactionInput, isEditing: true}
         }
@@ -204,14 +203,12 @@ export default {
 
     deleteTransaction: async function({ transactionInput}, req) {
         if(!req.isAuth) {
-            console.log('not auth')
             const error = new Error('Not authenticated.')
             error.code = 401;
             throw error
         }
         const user = await User.findById(req.userId)
         if(!user) {
-            console.log('no user')
             const error = new Error('User not found.')
             error.code = 401;
             throw error

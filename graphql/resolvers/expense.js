@@ -171,7 +171,6 @@ export default {
                 return true
             }
         })
-        // console.log('deleted expense', deletedExpense)
 
         user.expenses = user.expenses.filter(expense => expense._id !== expenseInputId)
 

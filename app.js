@@ -3,7 +3,7 @@ import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import graphHttp from 'express-graphql'
 import cors from 'cors'
-
+import helmet from 'helmet'
 import graphqlSchema from './graphql/schema'
 import graphqlResolver from './graphql/resolvers'
 
@@ -18,6 +18,8 @@ app.use('*', cors());
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
+
+app.use(helmet())
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');

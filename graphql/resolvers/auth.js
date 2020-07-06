@@ -28,13 +28,11 @@ const transporter = nodemailer.createTransport(sendGridTransport({
             const error = new Error('invalid input')
             error.data = errors;
             error.code = 422;
-            console.log('throwing error')
             throw error
         }
         const existingUser = await User.findOne({ email: userInput.email});
         if(existingUser) {
             const error = new Error('User exists already!');
-            console.log('throwing error')
             throw error
         };
         const hashedPassword = await bcrypt.hash(userInput.password, 12);
@@ -52,7 +50,37 @@ const transporter = nodemailer.createTransport(sendGridTransport({
             verificationCode: verificationCode
         })
 
-        const createdUser = await user.save()
+        // const createdUser = await user.save()
+        // const token = jwt.sign({
+        //         userId: user._id.toString(),
+        //         email: user.email
+        // }, 'infiowenfew123', { expiresIn: '24h'})
+    
+            // return {
+            //     token: token,
+            //     user: {
+            //         ...createdUser._doc, 
+            //         _id: createdUser._id.toString()
+            //     }
+            // }
+
+        const isEmailSent = await transporter.sendMail({
+            to: userInput.email,
+            from: 'rasoloanja@gmail.com',
+            subject: 'Here is your validation code',
+            html: `<div>
+                      <div>Hello ${userInput.name},</div>
+                      <br>
+                      <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
+                      <br>
+                      <div><b>${verificationCode}</b></div>
+                      <br>
+                      <div>Thank you!</div>
+                   <div>`
+        })
+
+        if(isEmailSent){
+            const createdUser = await user.save()
             const token = jwt.sign({
                 userId: user._id.toString(),
                 email: user.email
@@ -65,44 +93,13 @@ const transporter = nodemailer.createTransport(sendGridTransport({
                     _id: createdUser._id.toString()
                 }
             }
-
-        // const isEmailSent = await transporter.sendMail({
-        //     to: userInput.email,
-        //     from: 'rasoloanja@gmail.com',
-        //     subject: 'Here is your validation code',
-        //     html: `<div>
-        //               <div>Hello ${userInput.name},</div>
-        //               <br>
-        //               <div>Please ensure that the following validation code is entered within the next 30 minutes:</div>
-        //               <br>
-        //               <div><b>${verificationCode}</b></div>
-        //               <br>
-        //               <div>Thank you!</div>
-        //            <div>`
-        // })
-
-        // if(isEmailSent){
-        //     const createdUser = await user.save()
-        //     const token = jwt.sign({
-        //         userId: user._id.toString(),
-        //         email: user.email
-        //     }, 'infiowenfew123', { expiresIn: '24h'})
-    
-        //     return {
-        //         token: token,
-        //         user: {
-        //             ...createdUser._doc, 
-        //             _id: createdUser._id.toString()
-        //         }
-        //     }
-        // } else {
-        //     const error = new Error('Email not sent');
-        //     error.code = 401;
-        //     throw error
-        // }
+        } else {
+            const error = new Error('Email not sent');
+            error.code = 401;
+            throw error
+        }
     },
     login: async function({ email, password}) {
-        console.log('logging in')
         const user = await User.findOne({ email: email})
         if(!user) {
             const error = new Error('User not found.');
@@ -167,7 +164,6 @@ const transporter = nodemailer.createTransport(sendGridTransport({
     sendCodeToResetPassword: async function({email}, req){
         const existingUser = await User.findOne({ email: email});
         if(!existingUser) {
-            console.log('no user found')
             const error = new Error('No user found');
             error.code = 404
             throw error
@@ -250,7 +246,6 @@ const transporter = nodemailer.createTransport(sendGridTransport({
         if(user.password.old.length > 0){
             for(const oldPassword of user.password.old){
                 const isEqual = await bcrypt.compare(password, oldPassword);
-                console.log(isEqual)
                 if(isEqual){
                     const error = new Error('This is an old password. Please enter a new one')
                     error.code = 404

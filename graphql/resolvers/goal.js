@@ -1,7 +1,6 @@
 import User from '../../models/user'
 export default {
     addGoal: async function({goalInput}, req) {
-        console.log('addning goal')
         if(!req.isAuth) {
             const error = new Error('Not authenticated.')
             error.code = 401;

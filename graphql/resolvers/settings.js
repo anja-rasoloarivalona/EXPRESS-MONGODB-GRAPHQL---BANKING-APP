@@ -40,7 +40,6 @@ export default {
             error.code = 401;
             throw error
         }
-        console.log('setting theme')
         user.settings.theme = theme
         await user.save()
         return 'success'

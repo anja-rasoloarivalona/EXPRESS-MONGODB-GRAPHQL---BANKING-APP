@@ -6,7 +6,6 @@ export default (req, res, next) => {
     const authHeader = req.get('Authorization')
     if(!authHeader){
         req.isAuth = false
-        console.log('no auth header')
         return next()
     }
     const token = authHeader.split(' ')[1];
