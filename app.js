@@ -17,7 +17,7 @@ const app = express();
 app.use(helmet())
 // app.use(compression())
 
-app.use('*', cors());
+app.use(cors());
 
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
@@ -26,8 +26,8 @@ app.use(bodyParser.json()); // application/json
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:8080');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization, Accept');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Authorization');
   if(req.method === 'OPTIONS'){
     return res.sendStatus(200)
   }
