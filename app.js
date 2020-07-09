@@ -14,9 +14,10 @@ import isAuth from './middleware/is-auth'
 
 const app = express();
 
-app.use('*', cors());
+// app.use('*', cors());
 
-app.use(helmet())
+// app.use(helmet())
+
 // app.use(compression())
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
