@@ -16,6 +16,8 @@ const app = express();
 
 // app.use('*', cors());
 
+app.use(cors({origin: '*'}))
+
 // app.use(helmet())
 
 // app.use(compression())
@@ -42,7 +44,6 @@ app.use('/graphql', graphHttp({
   rootValue: graphqlResolver,
   graphiql: false,
   customFormatErrorFn: err => {
-    console.log('throwing error', err)
     if(!err.originalError) {
       return err
     }
