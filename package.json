@@ -27,12 +27,12 @@
     "nodemailer": "^6.4.6",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "uuidv4": "^6.0.6",
-    "validator": "^12.2.0"
-  },
-  "devDependencies": {
+    "validator": "^12.2.0",
     "babel-cli": "^6.24.1",
     "babel-preset-latest": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1"
+  },
+  "devDependencies": {
     "nodemon": "^1.18.4"
   }
 }
