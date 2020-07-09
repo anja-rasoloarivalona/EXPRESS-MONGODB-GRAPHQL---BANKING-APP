@@ -32,6 +32,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT,PATCH,DELETE');
   res.setHeader("Access-Control-Allow-Credentials", true);
+  res.setDefaultEncoding("Access-Control-Max-Age", 86400)
   if(req.method === 'OPTIONS'){
     return res.sendStatus(200)
   }
