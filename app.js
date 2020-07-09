@@ -12,8 +12,13 @@ import isAuth from './middleware/is-auth'
 
 const app = express();
 
+const corsOptions = {
+  origin: true, 
+  credentials: true
+}
+app.options('*', cors(corsOptions));
+
 app.use(helmet())
-app.use(cors());
 
 // app.use(cors({origin: '*'}))
 
