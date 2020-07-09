@@ -25,8 +25,8 @@ app.use(cors());
 app.use(bodyParser.json()); // application/json
 // app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
+app.all('/graphql', function (req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', "*");
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT, PATCH,DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Authorization,Accept');
   if(req.method === 'OPTIONS'){
