@@ -14,7 +14,7 @@ import isAuth from './middleware/is-auth'
 
 const app = express();
 
-app.use('*', cors());
+app.use(cors());
 
 // app.use(cors({origin: '*'}))
 
@@ -23,10 +23,12 @@ app.use('*', cors());
 // app.use(compression())
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS,PUT, PATCH,DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type,Authorization,Accept');
   if(req.method === 'OPTIONS'){
     return res.sendStatus(200)
   }
