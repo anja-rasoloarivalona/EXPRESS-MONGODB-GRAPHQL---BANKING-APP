@@ -36,10 +36,24 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GOPTIONS, GET, POST, PUT, DELETE');
   // res.header("Access-Control-Allow-Credentials", true);
   // res.header("Access-Control-Max-Age", 86400)
-  if(req.method === 'OPTIONS'){
-    return res.sendStatus(200)
-  } 
-  next()
+
+  if (req.method === 'OPTIONS') {
+    var headers = {};
+    // IE8 does not allow domains to be specified, just the *
+    // headers["Access-Control-Allow-Origin"] = req.headers.origin;
+    headers["Access-Control-Allow-Origin"] = "*";
+    headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, OPTIONS";
+    headers["Access-Control-Allow-Credentials"] = false;
+    headers["Access-Control-Max-Age"] = '86400'; // 24 hours
+    headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
+    res.writeHead(200, headers);
+    res.end();
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
+    res.header('Access-Control-Allow-Methods', 'GOPTIONS, GET, POST, PUT, DELETE');
+    next()
+  }
 });
 
 
