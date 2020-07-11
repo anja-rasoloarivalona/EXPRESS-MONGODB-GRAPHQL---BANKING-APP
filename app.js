@@ -12,32 +12,18 @@ import isAuth from './middleware/is-auth'
 
 const app = express();
 
-// const corsOptions = {
-//   origin: true, 
-//   credentials: true
-// }
-
 app.use(helmet())
 app.use(compression())
 
 app.use('*', cors());
-
-
-// app.use(cors({origin: '*'}))
-
 
 // app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
 app.use(bodyParser.json()); // application/json
 // app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
-  res.header('Access-Control-Allow-Methods', 'GOPTIONS, GET, POST, PUT, DELETE');
-  // res.header("Access-Control-Allow-Credentials", true);
-  // res.header("Access-Control-Max-Age", 86400)
-
   if (req.method === 'OPTIONS') {
+    console.log('options')
     var headers = {};
     // IE8 does not allow domains to be specified, just the *
     // headers["Access-Control-Allow-Origin"] = req.headers.origin;
@@ -47,11 +33,12 @@ app.use((req, res, next) => {
     headers["Access-Control-Max-Age"] = '86400'; // 24 hours
     headers["Access-Control-Allow-Headers"] = "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept";
     res.writeHead(200, headers);
-    res.end();
+    return res.end()
   } else {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
-    res.header('Access-Control-Allow-Methods', 'GOPTIONS, GET, POST, PUT, DELETE');
+    console.log('else')
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, X-HTTP-Method-Override, Content-Type, Authorization, Accept');
+    res.setHeader('Access-Control-Allow-Methods', "POST, GET, PUT, DELETE, OPTIONS");
     next()
   }
 });
@@ -60,7 +47,7 @@ app.use((req, res, next) => {
 app.use(isAuth)
 
 
-app.use('/graphql', cors(), graphHttp({
+app.use('/graphql', graphHttp({
   schema: graphqlSchema,
   rootValue: graphqlResolver,
   graphiql: false,

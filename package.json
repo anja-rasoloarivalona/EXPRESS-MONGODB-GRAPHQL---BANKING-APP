@@ -7,7 +7,7 @@
     "node": "12.14.1"
   },
   "scripts": {
-    "start": "NODE_ENV=production MONGO_USER=anja MONGO_PASSWORD=anjanirina NODEMAILER_API_KEY=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 node --exec babel-node app.js",
+    "start": "NODE_ENV=production MONGO_USER=anja MONGO_PASSWORD=anjanirina NODEMAILER_API_KEY=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 ./node_modules/.bin/babel-node app.js",
     "start:dev": "nodemon --exec babel-node app.js"
   },
   "author": "anja rasoloarivalona",
