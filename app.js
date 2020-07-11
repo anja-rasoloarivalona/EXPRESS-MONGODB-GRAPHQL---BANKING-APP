@@ -69,7 +69,7 @@ app.use('/graphql', graphHttp({
 mongoose
   .connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-wijrw.mongodb.net/bank`, { useNewUrlParser: true, useUnifiedTopology: true } )
   .then(result => {
-    app.listen(process.env.PORT || 8000)
+    app.listen(process.env.PORT || 4001)
     console.log('connected')
   })
   .catch(err => console.log(err));
