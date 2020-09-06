@@ -9,7 +9,8 @@ import * as Transaction from './transaction.js'
 import * as User from './user.js'
 import * as Utility from './utility.js'
 import * as Wallet from './wallet.js'
-import { buildSchema } from 'graphql'
+import graphql from 'graphql'
+const { buildSchema } = graphql
 
 const types = []
 const inputs = []
