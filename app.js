@@ -16,48 +16,33 @@ const app = express();
 //   credentials: true
 // }
 
-// app.use(helmet())
-// app.use(compression())
 
+app.use(helmet());
+app.use(compression())
+app.use('*', cors());
 
-let allowedOrigin = [
-  'https://wallet-anja.firebaseapp.com',
-];
-
-app.use(
-  cors({
-      origin: (origin, callback) => {
-          if (allowedOrigin.indexOf(origin) !== -1 || !origin) {
-              callback(null, true);
-          } else {
-              callback(new Error('Not allowed by CORS'));
-          }
-      },
-      credentials: true
-  })
-);
-
-
-// app.use(cors({origin: '*'}))
-
-
-// app.use(bodyParser.urlencoded()); // x-www-form-urlencoded <form>
-app.use(bodyParser.json()); // application/json
-// app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
-  console.log('request', req)
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
-  res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE');
-  // res.header("Access-Control-Allow-Credentials", true);
-  // res.header("Access-Control-Max-Age", 86400)
-  if(req.method === 'OPTIONS'){
-    console.log('is options', res)
-    return res.sendStatus(204)
-  } 
-  next()
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    next();
 });
+  
+
+// app.use((req, res, next) => {
+//   console.log('request', req)
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Authorization, Accept');
+//   res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE');
+//   // res.header("Access-Control-Allow-Credentials", true);
+//   // res.header("Access-Control-Max-Age", 86400)
+//   if(req.method === 'OPTIONS'){
+//     console.log('is options', res)
+//     return res.sendStatus(204)
+//   } 
+//   next()
+// });
 
 app.use(isAuth)
 app.use('/graphql', graphHttp({
