@@ -1,5 +1,6 @@
 import User from '../../models/user.js'
-import { uuid } from 'uuidv4'
+import pkg from 'uuidv4'
+const { uuid } = pkg
 
 export default {
     addWallet: async function({ walletInput}, req) {

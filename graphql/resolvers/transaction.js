@@ -1,6 +1,7 @@
 import User from '../../models/user.js'
 import { dateRangeCalculator } from '../../utilities/DateRangeCalculator.js'
-import { uuid } from 'uuidv4'
+import pkg from 'uuidv4'
+const { uuid } = pkg
 
 export default {
     editTransaction: async function({transactionInput}, req) {

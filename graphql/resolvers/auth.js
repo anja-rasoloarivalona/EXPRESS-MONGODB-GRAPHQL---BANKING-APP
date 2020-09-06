@@ -3,8 +3,9 @@ import validator from 'validator'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 import sendGridTransport from 'nodemailer-sendgrid-transport'
-import { uuid } from 'uuidv4'
 import User from '../../models/user.js'
+import pkg from 'uuidv4'
+const { uuid } = pkg
 
 const transporter = nodemailer.createTransport(sendGridTransport({
     auth: {
