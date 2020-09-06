@@ -1,10 +1,10 @@
-import Auth from './auth'
-import Wallet from './wallet'
-import Income from './income'
-import Expense from './expense'
-import Goal from './goal'
-import Transaction from './transaction'
-import Settings from './settings'
+import Auth from './auth.js'
+import Wallet from './wallet.js'
+import Income from './income.js'
+import Expense from './expense.js'
+import Goal from './goal.js'
+import Transaction from './transaction.js'
+import Settings from './settings.js'
 
 export default {
     ...Auth,

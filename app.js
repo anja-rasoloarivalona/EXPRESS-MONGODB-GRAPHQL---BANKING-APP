@@ -7,8 +7,7 @@ import helmet from 'helmet'
 import compression from 'compression'
 import graphqlSchema from './graphql/schema/index.js'
 import graphqlResolver from './graphql/resolvers/index.js'
-
-import isAuth from './middleware/is-auth'
+import isAuth from './middleware/is-auth.js'
 
 const app = express();
 
