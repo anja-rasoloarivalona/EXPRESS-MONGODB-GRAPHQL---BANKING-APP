@@ -1,5 +1,5 @@
 import User from '../../models/user.js'
-import { dateRangeCalculator } from '../../utilities/DateRangeCalculatoréjs'
+import { dateRangeCalculator } from '../../utilities/DateRangeCalculator.js'
 import { uuid } from 'uuidv4'
 
 export default {
